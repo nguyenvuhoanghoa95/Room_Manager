@@ -1,39 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
 
-class ToDoItem extends StatelessWidget {
-  const ToDoItem({super.key});
+class HouseItems extends StatelessWidget {
+  final String address;
+  final String nameOwner;
+  final int availableRooms;
+
+  VoidCallback removeHouseFuntion;
+  VoidCallback navigateToRoomPage;
+
+  HouseItems(
+      {super.key,
+      required this.address,
+      required this.nameOwner,
+      required this.availableRooms,
+      required this.removeHouseFuntion,
+      required this.navigateToRoomPage});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        // This function will be called when the container is tapped.
-        print('Container tapped!');
-      },
       child: Container(
-        margin: EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: 20),
         child: ListTile(
-          onTap: () {},
+          onTap: navigateToRoomPage,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           tileColor: Colors.white,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Location Name',
-                style: TextStyle(
+                nameOwner,
+                style: const TextStyle(
                   fontSize: 20,
                   color: tbBlack,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Address of location Address of location Address of location Address of location',
-                style: TextStyle(
+                "Room Available : $availableRooms",
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: tbBlack,
+                ),
+              ),
+              Text(
+                address,
+                style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,
                 ),
@@ -41,8 +58,8 @@ class ToDoItem extends StatelessWidget {
             ],
           ),
           trailing: Container(
-            padding: EdgeInsets.all(0),
-            margin: EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.all(0),
+            margin: const EdgeInsets.symmetric(vertical: 6),
             height: 35,
             width: 35,
             decoration: BoxDecoration(
@@ -50,8 +67,8 @@ class ToDoItem extends StatelessWidget {
             child: IconButton(
               color: Colors.white,
               iconSize: 18,
-              icon: Icon(Icons.delete),
-              onPressed: () {},
+              icon: const Icon(Icons.delete),
+              onPressed: removeHouseFuntion,
             ),
           ),
         ),
