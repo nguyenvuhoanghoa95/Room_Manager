@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:room_manager/widgets/appbar.dart';
-import 'package:room_manager/widgets/dialog_box.dart';
-import '../../constants/colors.dart';
-import '../../widgets/house_items.dart';
+import 'package:room_manager/database/database_setting.dart';
+import 'package:room_manager/model/house.dart';
+import 'package:room_manager/widgets/appbar/custom_appbar.dart';
+import 'package:room_manager/widgets/dialog/house_dialog.dart';
+import '../constants/colors.dart';
+import '../widgets/house/house_items.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -14,26 +16,38 @@ class HomePage extends StatefulWidget {
   }
 
   class _HomePageState extends State<HomePage> {
-
+  
   final _addressController = TextEditingController(); 
   final _nameOwnerController = TextEditingController();
   final _availableRoomsController = TextEditingController();
+  final _electricityPriceController = TextEditingController();
+  final _waterPriceController = TextEditingController();
 
-    List homeList = [
-      ["401 Nguyen Van Troi, Phuong 9 , Quan Phu Nhuan",'Nguyen Duazn', 5], 
-      ["195 Phan Van Tri, Phuong 12 , Quan Binh Thanh",'Nguyen Duazn', 5],
-      ["201 Tran Hung Dao, Phuong 5 , Quan 1",'Hoa Nguyen', 5]
-    ];
+
+  List<House>? houses = houseBox.values.toList();
 
   //save new home 
   void saveNewHome() {
-    setState(() {
-      if(_addressController.text.isNotEmpty && _nameOwnerController.text.isNotEmpty && _availableRoomsController.text.isNotEmpty){
-      homeList.add([_addressController.text,_nameOwnerController.text,int.parse(_availableRoomsController.text)]);
+      if(_addressController.text.isNotEmpty && 
+      _nameOwnerController.text.isNotEmpty && 
+      _availableRoomsController.text.isNotEmpty &&
+      _electricityPriceController.text.isNotEmpty &&
+      _waterPriceController.text.isNotEmpty){
+      houseBox.add(
+        House(_addressController.text,
+              _nameOwnerController.text,
+              int.parse(_availableRoomsController.text),
+              int.parse(_electricityPriceController.text),
+              int.parse(_waterPriceController.text),[])
+      );
       _addressController.clear();
       _nameOwnerController.clear();
       _availableRoomsController.clear();
+      _electricityPriceController.clear();
+      _waterPriceController.clear();
       }
+    setState(() {
+      houses = List<House>.from(houseBox.values);
     });
     Navigator.of(context).pop();
   }
@@ -44,28 +58,32 @@ class HomePage extends StatefulWidget {
     showDialog(
      context: context ,
      builder: (context) {
-      return DialogBox(
+      return HouseDialog(
         addressController: _addressController,
         availableRoomsController: _availableRoomsController,
         nameOwnerController: _nameOwnerController,
-        create: saveNewHome, cancel: () => Navigator.of(context).pop(),);
+        electricityPriceController: _electricityPriceController,
+        waterPriceController: _waterPriceController,
+        create: saveNewHome,
+        cancel: () => Navigator.of(context).pop(),);
     },);
   }
 
   // Remove home
    removeHouse(int index){
+    houseBox.deleteAt(index);
     setState(() {
-      homeList.removeAt(index);
+      houses = List<House>.from(houseBox.values);
     });
   }
 
 
  //Navigate to roompage 
-  navigateToRoomPage(context){
-    print("TUTU");
+  navigateToRoomPage(context,int houseId){
      Navigator.pushNamed(
         context,
-        '/room-page'
+        '/room-page',
+        arguments: houseId
       );
   }
 
@@ -73,7 +91,7 @@ class HomePage extends StatefulWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tbBGColor,
-      appBar: const CustomAppBar(),
+      appBar: CustomAppBar(namePage: "House Pages",),
       body: Stack(
         children: [
           Container(
@@ -81,37 +99,22 @@ class HomePage extends StatefulWidget {
               child: Column(
                 children: [
                   searchBox(),
-                  Container(
-                    margin: const EdgeInsets.only(
-                      top: 50,
-                      bottom: 5,
-                    ),
-                    child: const Text(
-                      "Houses",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: homeList.length,
+                      itemCount: houses?.length,
                       itemBuilder: (BuildContext context, int index) {
-                        if(homeList.isNotEmpty){
+                        if(houses!.isNotEmpty){
                           return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
                             child: HouseItems(
-                              address: homeList[index]?[0],
-                              nameOwner: homeList[index]?[1],
-                              availableRooms:homeList[index]?[2],
+                              house: houses![index],
                               removeHouseFuntion:() {
                                 removeHouse(index);
                               },
                               navigateToRoomPage: () {
-                                navigateToRoomPage(context);
+                                navigateToRoomPage(context,houses![index].id);
                               },)
                         );
                         }

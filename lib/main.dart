@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:room_manager/constants/database_setting.dart';
+import 'package:room_manager/database/database_setting.dart';
 import 'package:room_manager/model/activity.dart';
 import 'package:room_manager/model/house.dart';
 import 'package:room_manager/model/invoice.dart';
-import 'package:room_manager/model/renter.dart';
 import 'package:room_manager/model/room.dart';
-import 'package:room_manager/screens/home/home_page.dart';
+import 'package:room_manager/screens/home_page.dart';
 import 'package:room_manager/screens/room_page.dart';
 
 void main() async {
@@ -15,16 +14,22 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(HouseAdapter());
   Hive.registerAdapter(RoomAdapter());
-  Hive.registerAdapter(RenterAdapter());
   Hive.registerAdapter(ActivityAdapter());
   Hive.registerAdapter(InvoiceAdapter());
+
+  houseBox = await Hive.openBox<House>(houseTableName);
+  roomBox = await Hive.openBox<Room>(roomTableName);
+  roomActivitysBox = await Hive.openBox<Activity>(roomActivitysTableName);
+  invoiceBox = await Hive.openBox<Invoice>(invoiceTableName);
   
-  // house = await Hive.openBox(houseTableName);
-  // room = await Hive.openBox(roomTableName);
-  // roomRenter = await Hive.openBox(roomRenterTableName);
-  // roomActivitys = await Hive.openBox(roomActivitysTableName);
-  // invoice = await Hive.openBox(invoiceTableName);
+  // List<House> newHouses = [ 
+  //   House('123 Main St','John Doe',2,3500,1700,[]),
+  //   House('456 Main St','Bob Johnson',3,3500,1700,[]),
+  //   House( '234 Maple St','David Wilson',5,3500,1700,[]),
+  // ];
   
+  // houseBox.addAll(newHouses);
+
   runApp(const MyApp());
 }
 

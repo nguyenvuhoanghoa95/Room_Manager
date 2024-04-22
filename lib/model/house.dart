@@ -18,11 +18,18 @@ class House extends HiveObject{
   @HiveField(3)
    late int availableRooms;
 
-  @HiveField(4)
+   @HiveField(4)
+   late int electricityPrice;
+
+   @HiveField(5)
+   late int waterPrice;
+
+  @HiveField(6)
    late List<int> roomIds;
+   
 
   // Constructor
-  House(this.address, this.nameOwner, this.availableRooms, this.roomIds) {
+  House(this.address, this.nameOwner, this.availableRooms, this.electricityPrice, this.waterPrice , this.roomIds) {
     id = ++_lastId; // Increment the last used ID and assign it to the current instance
   }
 }

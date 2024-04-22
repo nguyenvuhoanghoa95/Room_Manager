@@ -19,8 +19,8 @@ class RoomAdapter extends TypeAdapter<Room> {
     return Room(
       fields[1] as DateTime,
       fields[2] as int,
-      fields[3] as House,
-      fields[4] as int,
+      fields[3] as int,
+      fields[4] as String,
       fields[5] == null ? 0.0 : fields[5] as double,
       fields[6] as double,
       fields[7] as int,
@@ -42,9 +42,9 @@ class RoomAdapter extends TypeAdapter<Room> {
       ..writeByte(2)
       ..write(obj.roomNumber)
       ..writeByte(3)
-      ..write(obj.house)
+      ..write(obj.houseId)
       ..writeByte(4)
-      ..write(obj.roomRenterId)
+      ..write(obj.roomRenterName)
       ..writeByte(5)
       ..write(obj.amountOfRoom)
       ..writeByte(6)

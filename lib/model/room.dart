@@ -18,10 +18,10 @@ class Room extends HiveObject {
   late int roomNumber;
 
   @HiveField(3)
-  late House house;
+  late int houseId;
 
   @HiveField(4)
-  late int roomRenterId;
+  late String roomRenterName;
 
   @HiveField(5 , defaultValue: 0.0)
   late double amountOfRoom;
@@ -45,7 +45,7 @@ class Room extends HiveObject {
   late bool status;
 
   // Constructor
-  Room(this.startDate, this.roomNumber, this.house, this.roomRenterId, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.roomActivitieIds, this.invoiceIds, this.status){
+  Room(this.startDate, this.roomNumber, this.houseId, this.roomRenterName, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.roomActivitieIds, this.invoiceIds, this.status){
      id = ++_lastId; // Increment the last used ID and assign it to the current instance
   }
 }

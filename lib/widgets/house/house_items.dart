@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
+import 'package:room_manager/model/house.dart';
 
 class HouseItems extends StatelessWidget {
-  final String address;
-  final String nameOwner;
-  final int availableRooms;
+
+  House house;
 
   VoidCallback removeHouseFuntion;
   VoidCallback navigateToRoomPage;
 
   HouseItems(
       {super.key,
-      required this.address,
-      required this.nameOwner,
-      required this.availableRooms,
+      required this.house,
       required this.removeHouseFuntion,
       required this.navigateToRoomPage});
 
@@ -34,7 +32,7 @@ class HouseItems extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                nameOwner,
+                house.nameOwner,
                 style: const TextStyle(
                   fontSize: 20,
                   color: tbBlack,
@@ -42,14 +40,14 @@ class HouseItems extends StatelessWidget {
                 ),
               ),
               Text(
-                "Room Available : $availableRooms",
+                "Room Available : ${house.availableRooms}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,
                 ),
               ),
               Text(
-                address,
+                house.address,
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,
@@ -57,19 +55,23 @@ class HouseItems extends StatelessWidget {
               ),
             ],
           ),
-          trailing: Container(
-            padding: const EdgeInsets.all(0),
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            height: 35,
-            width: 35,
-            decoration: BoxDecoration(
-                color: tdRed, borderRadius: BorderRadius.circular(5)),
-            child: IconButton(
-              color: Colors.white,
-              iconSize: 18,
-              icon: const Icon(Icons.delete),
-              onPressed: removeHouseFuntion,
-            ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PopupMenuButton(
+                      position: PopupMenuPosition.under,
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          onTap: removeHouseFuntion,
+                          child: const Text('Delete'),
+                        ),
+                         const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Edit'),
+                        )
+                      ],
+                    ),
+            ],
           ),
         ),
       ),
