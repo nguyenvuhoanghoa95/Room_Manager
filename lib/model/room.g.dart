@@ -38,7 +38,7 @@ class RoomAdapter extends TypeAdapter<Room> {
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.startDate)
+      ..write(obj.rentDueDate)
       ..writeByte(2)
       ..write(obj.roomNumber)
       ..writeByte(3)

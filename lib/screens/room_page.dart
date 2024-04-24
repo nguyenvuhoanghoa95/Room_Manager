@@ -1,13 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/database/database_setting.dart';
-import 'package:room_manager/model/house.dart';
 import 'package:room_manager/model/room.dart';
-import 'package:room_manager/widgets/appbar/custom_appbar.dart';
 import 'package:room_manager/widgets/appbar/room_appbar.dart';
 import 'package:room_manager/widgets/dialog/room_dialog.dart';
-import 'package:room_manager/widgets/room/room_items.dart';
+import 'package:room_manager/widgets/room/room_item.dart';
 
 class RoomPage extends StatefulWidget {
   const RoomPage({super.key});
@@ -17,38 +14,52 @@ class RoomPage extends StatefulWidget {
 }
 
 Widget searchBox() {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child: const TextField(
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.all(0),
-          prefixIcon: Icon(
-            Icons.search,
-            color: tbBlack,
-            size: 20,
-          ),
-          prefixIconConstraints: BoxConstraints(
-            maxHeight: 20,
-            minWidth: 25,
-          ),
-          border: InputBorder.none,
-          hintText: 'Search',
-          hintStyle: TextStyle(color: tbGrey),
+  return Container(
+    decoration: BoxDecoration(
+        color: Colors.white, borderRadius: BorderRadius.circular(20)),
+    child: const TextField(
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.all(0),
+        prefixIcon: Icon(
+          Icons.search,
+          color: tbBlack,
+          size: 20,
         ),
+        prefixIconConstraints: BoxConstraints(
+          maxHeight: 20,
+          minWidth: 25,
+        ),
+        border: InputBorder.none,
+        hintText: 'Search',
+        hintStyle: TextStyle(color: tbGrey),
       ),
-    );
-  }
-  
-
+    ),
+  );
+}
 
 class _RoomPageState extends State<RoomPage> {
-    
+  int? houseId;
+  List<Room>? rooms;
 
-    //save new home 
-  void saveNewHome() {
-    //   if(_addressController.text.isNotEmpty && 
-    //   _nameOwnerController.text.isNotEmpty && 
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () {
+      houseId = ModalRoute.of(context)!.settings.arguments as int?;
+      
+      setState(() {
+        rooms = roomBox.values
+          .where((element) => element.houseId == houseId)
+          .toList();
+      });
+      print(roomBox.values.toList());
+    });
+  }
+
+  //save new home
+  void saveNewRoom() {
+    //   if(_addressController.text.isNotEmpty &&
+    //   _nameOwnerController.text.isNotEmpty &&
     //   _availableRoomsController.text.isNotEmpty &&
     //   _electricityPriceController.text.isNotEmpty &&
     //   _waterPriceController.text.isNotEmpty){
@@ -71,25 +82,40 @@ class _RoomPageState extends State<RoomPage> {
     Navigator.of(context).pop();
   }
 
-
-  // Create new home 
-  void createNewRoom(){
+  // Create new home
+  void createNewRoom() {
     showDialog(
-     context: context ,
-     builder: (context) {
-      return RoomDialog(
-        create: saveNewHome,
-        cancel: () => Navigator.of(context).pop(),);
-    },);
+      context: context,
+      builder: (context) {
+        return RoomDialog(
+          create: saveNewRoom,
+          cancel: () => Navigator.of(context).pop(),
+        );
+      },
+    );
   }
 
+  // Remove room
+  removeRoom(int index) {
+    roomBox.deleteAt(index);
+    if (rooms != null) {
+      setState(() {
+        rooms = List<Room>.from(roomBox.values);
+      });
+    }
+  }
+
+//  //Navigate to roompage
+//   navigateToRoomPage(CalendarDatePicker){
+//      Navigator.pushNamed(
+//         context,
+//         '/room-page',
+//         arguments: roomId
+//       );
+//   }
 
   @override
   Widget build(BuildContext context) {
-    
-    int? houseId = ModalRoute.of(context)!.settings.arguments as int?;
-    List<Room> rooms = roomBox.values.where((element) => element.houseId == houseId).toList();
-
     return Scaffold(
       backgroundColor: tbBGColor,
       appBar: RoomAppBar(),
@@ -102,23 +128,15 @@ class _RoomPageState extends State<RoomPage> {
                   searchBox(),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: rooms.length,
+                      itemCount: rooms?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
-                        if(rooms.isNotEmpty){
-                          return Container(
+                        return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
-                            // child: RoomItems(
-                            //   // room: Room(roomNumber, houseId, roomRenterName, amountOfRoom, totalAmountOwed, currentElectricityNumber, currentWaterNumber, roomActivitieIds, invoiceIds, status),
-                            //   removeHouseFuntion:() {
-                            //     // removeHouse(index);
-                            //   },
-                            //   navigateToRoomPage: () {
-                            //     // navigateToRoomPage(context);
-                            //   },)
-                        );
-                        }
+                            child: RoomItem(
+                                room: rooms![index],
+                                removeRoomFuntion: () => removeRoom(index)));
                       },
                     ),
                   )

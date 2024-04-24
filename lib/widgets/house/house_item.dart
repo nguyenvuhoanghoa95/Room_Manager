@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/model/house.dart';
 
-class HouseItems extends StatelessWidget {
+class HouseItem extends StatelessWidget {
 
   House house;
 
   VoidCallback removeHouseFuntion;
   VoidCallback navigateToRoomPage;
 
-  HouseItems(
+  HouseItem(
       {super.key,
       required this.house,
       required this.removeHouseFuntion,

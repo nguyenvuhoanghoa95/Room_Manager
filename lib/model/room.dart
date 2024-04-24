@@ -1,6 +1,4 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:room_manager/model/house.dart';
-
 part 'room.g.dart';
 
 @HiveType(typeId: 2, adapterName: "RoomAdapter")
@@ -12,7 +10,7 @@ class Room extends HiveObject {
   late int id;
 
   @HiveField(1)
-  late DateTime startDate;
+  late DateTime rentDueDate;
 
   @HiveField(2)
   late int roomNumber;
@@ -45,7 +43,7 @@ class Room extends HiveObject {
   late bool status;
 
   // Constructor
-  Room(this.startDate, this.roomNumber, this.houseId, this.roomRenterName, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.roomActivitieIds, this.invoiceIds, this.status){
+  Room(this.rentDueDate, this.roomNumber, this.houseId, this.roomRenterName, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.roomActivitieIds, this.invoiceIds, this.status){
      id = ++_lastId; // Increment the last used ID and assign it to the current instance
   }
 }

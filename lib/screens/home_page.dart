@@ -4,7 +4,7 @@ import 'package:room_manager/model/house.dart';
 import 'package:room_manager/widgets/appbar/custom_appbar.dart';
 import 'package:room_manager/widgets/dialog/house_dialog.dart';
 import '../constants/colors.dart';
-import '../widgets/house/house_items.dart';
+import '../widgets/house/house_item.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -79,7 +79,7 @@ class HomePage extends StatefulWidget {
 
 
  //Navigate to roompage 
-  navigateToRoomPage(context,int houseId){
+  navigateToRoomPage(context,int houseId) {
      Navigator.pushNamed(
         context,
         '/room-page',
@@ -101,14 +101,13 @@ class HomePage extends StatefulWidget {
                   searchBox(),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: houses?.length,
+                      itemCount: houses?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
-                        if(houses!.isNotEmpty){
                           return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
-                            child: HouseItems(
+                            child: HouseItem(
                               house: houses![index],
                               removeHouseFuntion:() {
                                 removeHouse(index);
@@ -117,7 +116,6 @@ class HomePage extends StatefulWidget {
                                 navigateToRoomPage(context,houses![index].id);
                               },)
                         );
-                        }
                       },
                     ),
                   )
