@@ -6,12 +6,13 @@ class RoomItem extends StatelessWidget {
   
   final Room room;
   final VoidCallback removeRoomFuntion;
-
+  final VoidCallback navigateToInvoicePage;
 
   const RoomItem(
       {super.key,
       required this.room,
-      required this.removeRoomFuntion});
+      required this.removeRoomFuntion,
+      required this.navigateToInvoicePage});
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +20,7 @@ class RoomItem extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         child: ListTile(
+          onTap: navigateToInvoicePage,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -53,11 +55,11 @@ class RoomItem extends StatelessWidget {
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           onTap: removeRoomFuntion,
-                          child: const Text('Delete'),
+                          child: const Text('Sửa thông tin'),
                         ),
-                         const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Edit'),
+                        PopupMenuItem(
+                          onTap: removeRoomFuntion,
+                          child: const Text('Xóa phòng'),
                         )
                       ],
                     ),

@@ -1,49 +1,40 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:room_manager/database/database_setting.dart';
+import 'package:room_manager/model/invoice.dart';
 part 'room.g.dart';
 
 @HiveType(typeId: 2, adapterName: "RoomAdapter")
 class Room extends HiveObject {
 
-  static int _lastId = 0; // Static variable to keep track of last used ID
-
   @HiveField(0)
-  late int id;
-
-  @HiveField(1)
   late DateTime rentDueDate;
 
-  @HiveField(2)
+  @HiveField(1)
   late int roomNumber;
 
-  @HiveField(3)
-  late int houseId;
-
-  @HiveField(4)
+  @HiveField(2)
   late String roomRenterName;
 
-  @HiveField(5 , defaultValue: 0.0)
+  @HiveField(3 , defaultValue: 0.0)
   late double amountOfRoom;
 
-  @HiveField(6)
+  @HiveField(4, defaultValue: 0.0)
   late double totalAmountOwed;
 
-  @HiveField(7)
+  @HiveField(5)
   late int currentElectricityNumber;
 
-  @HiveField(8)
+  @HiveField(6)
   late int currentWaterNumber;
 
-  @HiveField(9)
-  late List<int> roomActivitieIds;
+  @HiveField(7)
+  late HiveList<Invoice> invoices;
 
-  @HiveField(10)
-  late List<int> invoiceIds;
-
-  @HiveField(11 , defaultValue: false)
+  @HiveField(8 , defaultValue: false)
   late bool status;
 
   // Constructor
-  Room(this.rentDueDate, this.roomNumber, this.houseId, this.roomRenterName, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.roomActivitieIds, this.invoiceIds, this.status){
-     id = ++_lastId; // Increment the last used ID and assign it to the current instance
+  Room(this.rentDueDate, this.roomNumber, this.roomRenterName, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.status){
+    invoices = HiveList(invoiceBox);
   }
 }

@@ -17,47 +17,38 @@ class RoomAdapter extends TypeAdapter<Room> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Room(
-      fields[1] as DateTime,
-      fields[2] as int,
-      fields[3] as int,
-      fields[4] as String,
-      fields[5] == null ? 0.0 : fields[5] as double,
-      fields[6] as double,
-      fields[7] as int,
-      fields[8] as int,
-      (fields[9] as List).cast<int>(),
-      (fields[10] as List).cast<int>(),
-      fields[11] == null ? false : fields[11] as bool,
-    )..id = fields[0] as int;
+      fields[0] as DateTime,
+      fields[1] as int,
+      fields[2] as String,
+      fields[3] == null ? 0.0 : fields[3] as double,
+      fields[4] == null ? 0.0 : fields[4] as double,
+      fields[5] as int,
+      fields[6] as int,
+      fields[8] == null ? false : fields[8] as bool,
+    )..invoices = (fields[7] as HiveList).castHiveList();
   }
 
   @override
   void write(BinaryWriter writer, Room obj) {
     writer
-      ..writeByte(12)
-      ..writeByte(0)
-      ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.rentDueDate)
-      ..writeByte(2)
-      ..write(obj.roomNumber)
-      ..writeByte(3)
-      ..write(obj.houseId)
-      ..writeByte(4)
-      ..write(obj.roomRenterName)
-      ..writeByte(5)
-      ..write(obj.amountOfRoom)
-      ..writeByte(6)
-      ..write(obj.totalAmountOwed)
-      ..writeByte(7)
-      ..write(obj.currentElectricityNumber)
-      ..writeByte(8)
-      ..write(obj.currentWaterNumber)
       ..writeByte(9)
-      ..write(obj.roomActivitieIds)
-      ..writeByte(10)
-      ..write(obj.invoiceIds)
-      ..writeByte(11)
+      ..writeByte(0)
+      ..write(obj.rentDueDate)
+      ..writeByte(1)
+      ..write(obj.roomNumber)
+      ..writeByte(2)
+      ..write(obj.roomRenterName)
+      ..writeByte(3)
+      ..write(obj.amountOfRoom)
+      ..writeByte(4)
+      ..write(obj.totalAmountOwed)
+      ..writeByte(5)
+      ..write(obj.currentElectricityNumber)
+      ..writeByte(6)
+      ..write(obj.currentWaterNumber)
+      ..writeByte(7)
+      ..write(obj.invoices)
+      ..writeByte(8)
       ..write(obj.status);
   }
 

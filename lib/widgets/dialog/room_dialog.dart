@@ -96,7 +96,7 @@ class _RoomDialog extends State<RoomDialog> {
                   filled: true,
                   fillColor: Colors.grey[200],
                   prefixIcon: const Icon(Icons.calendar_today),
-                  hintText: 'VD: 2023-03-12',
+                  hintText: 'VD: 03/12/2023',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide.none,
@@ -123,46 +123,6 @@ class _RoomDialog extends State<RoomDialog> {
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
-            // Container(
-            //   padding: const EdgeInsets.only(top: 10,bottom: 20),
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(2)
-            //   ),
-            //   child: TextField(
-            //     // controller: electricityPriceController,
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.grey[200],
-            //       hintText: 'Current Electricity Number',
-            //       border: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(10.0),
-            //         borderSide: BorderSide.none,
-            //       ),
-            //     ),
-            //     keyboardType: TextInputType.number,
-            //     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            //   ),
-            // ),
-            // Container(
-            //   padding: const EdgeInsets.only(top: 10,bottom: 20),
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(2)
-            //   ),
-            //   child: TextField(
-            //     // controller: waterPriceController,
-            //     decoration: InputDecoration(
-            //       filled: true,
-            //       fillColor: Colors.grey[200],
-            //       hintText: 'Current Water Number',
-            //       border: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(10.0),
-            //         borderSide: BorderSide.none,
-            //       ),
-            //     ),
-            //     keyboardType: TextInputType.number,
-            //     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            //   ),
-            // ),
             //button --> save and close
             Row(
               children: [

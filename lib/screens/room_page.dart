@@ -47,12 +47,11 @@ class _RoomPageState extends State<RoomPage> {
     Future.delayed(Duration.zero, () {
       houseId = ModalRoute.of(context)!.settings.arguments as int?;
       
-      setState(() {
-        rooms = roomBox.values
-          .where((element) => element.houseId == houseId)
-          .toList();
-      });
-      print(roomBox.values.toList());
+      // setState(() {
+      //   rooms = roomBox.values
+      //     .where((element) => element.houseId == houseId)
+      //     .toList();
+      // });
     });
   }
 
@@ -105,20 +104,20 @@ class _RoomPageState extends State<RoomPage> {
     }
   }
 
-//  //Navigate to roompage
-//   navigateToRoomPage(CalendarDatePicker){
-//      Navigator.pushNamed(
-//         context,
-//         '/room-page',
-//         arguments: roomId
-//       );
-//   }
+ //Navigate to invoicePage
+  navigateToInvoicePage(int? roomId){
+     Navigator.pushNamed(
+        context,
+        '/invoice-page',
+        arguments: roomId
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tbBGColor,
-      appBar: RoomAppBar(),
+      appBar:const RoomAppBar(),
       body: Stack(
         children: [
           Container(
@@ -136,6 +135,7 @@ class _RoomPageState extends State<RoomPage> {
                             ),
                             child: RoomItem(
                                 room: rooms![index],
+                                navigateToInvoicePage: () => navigateToInvoicePage(index),
                                 removeRoomFuntion: () => removeRoom(index)));
                       },
                     ),

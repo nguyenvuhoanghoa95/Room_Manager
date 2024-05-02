@@ -1,97 +1,134 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/database/database_setting.dart';
 import 'package:room_manager/model/house.dart';
-import 'package:room_manager/widgets/appbar/custom_appbar.dart';
+import 'package:room_manager/widgets/appbar/home_appbar.dart';
 import 'package:room_manager/widgets/dialog/house_dialog.dart';
 import '../constants/colors.dart';
 import '../widgets/house/house_item.dart';
 
 class HomePage extends StatefulWidget {
-
   const HomePage({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
+}
 
-  }
-
-  class _HomePageState extends State<HomePage> {
-  
-  final _addressController = TextEditingController(); 
+class _HomePageState extends State<HomePage> {
+  final _addressController = TextEditingController();
   final _nameOwnerController = TextEditingController();
   final _availableRoomsController = TextEditingController();
   final _electricityPriceController = TextEditingController();
   final _waterPriceController = TextEditingController();
 
-
   List<House>? houses = houseBox.values.toList();
 
-  //save new home 
-  void saveNewHome() {
-      if(_addressController.text.isNotEmpty && 
-      _nameOwnerController.text.isNotEmpty && 
-      _availableRoomsController.text.isNotEmpty &&
-      _electricityPriceController.text.isNotEmpty &&
-      _waterPriceController.text.isNotEmpty){
-      houseBox.add(
-        House(_addressController.text,
-              _nameOwnerController.text,
-              int.parse(_availableRoomsController.text),
-              int.parse(_electricityPriceController.text),
-              int.parse(_waterPriceController.text),[])
-      );
+  //save home
+  saveHome({int? index = 0}) {
+    if (_addressController.text.isNotEmpty &&
+        _nameOwnerController.text.isNotEmpty &&
+        _availableRoomsController.text.isNotEmpty &&
+        _electricityPriceController.text.isNotEmpty &&
+        _waterPriceController.text.isNotEmpty) {
+      if (index == 0) {
+        houseBox.add(House(
+            _addressController.text,
+            _nameOwnerController.text,
+            int.parse(_availableRoomsController.text),
+            int.parse(_electricityPriceController.text),
+            int.parse(_waterPriceController.text)));
+      } else {
+        houseBox.putAt(
+            index!,
+            House(
+                _addressController.text,
+                _nameOwnerController.text,
+                int.parse(_availableRoomsController.text),
+                int.parse(_electricityPriceController.text),
+                int.parse(_waterPriceController.text)));
+      }
       _addressController.clear();
       _nameOwnerController.clear();
       _availableRoomsController.clear();
       _electricityPriceController.clear();
       _waterPriceController.clear();
-      }
+    }
     setState(() {
       houses = List<House>.from(houseBox.values);
     });
     Navigator.of(context).pop();
   }
 
-
-  // Create new home 
-  void createNewHome(){
+  // Create new home
+  createNewHome() {
     showDialog(
-     context: context ,
-     builder: (context) {
-      return HouseDialog(
-        addressController: _addressController,
-        availableRoomsController: _availableRoomsController,
-        nameOwnerController: _nameOwnerController,
-        electricityPriceController: _electricityPriceController,
-        waterPriceController: _waterPriceController,
-        create: saveNewHome,
-        cancel: () => Navigator.of(context).pop(),);
-    },);
+      context: context,
+      builder: (context) {
+        return HouseDialog(
+          addressController: _addressController,
+          availableRoomsController: _availableRoomsController,
+          nameOwnerController: _nameOwnerController,
+          electricityPriceController: _electricityPriceController,
+          waterPriceController: _waterPriceController,
+          create:() => saveHome(),
+          cancel: () => cancel(),
+        );
+      },
+    );
+  }
+
+  cancel(){
+     _addressController.clear();
+      _nameOwnerController.clear();
+      _availableRoomsController.clear();
+      _electricityPriceController.clear();
+      _waterPriceController.clear();
+    Navigator.of(context).pop();
+  }
+
+  //Edit house
+  editHome(House house, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        //Set up data
+        _addressController.text = house.address;
+        _availableRoomsController.text = "${house.availableRooms}";
+        _nameOwnerController.text = house.nameOwner;
+        _electricityPriceController.text = "${house.electricityPrice}";
+        _waterPriceController.text = "${house.waterPrice}";
+
+        //Open dialog
+        return HouseDialog(
+          addressController: _addressController,
+          availableRoomsController: _availableRoomsController,
+          nameOwnerController: _nameOwnerController,
+          electricityPriceController: _electricityPriceController,
+          waterPriceController: _waterPriceController,
+          edit: () => saveHome(index: index),
+          cancel: () => cancel(),
+        );
+      },
+    );
   }
 
   // Remove home
-   removeHouse(int index){
+  removeHouse(int index) {
     houseBox.deleteAt(index);
     setState(() {
       houses = List<House>.from(houseBox.values);
     });
   }
 
-
- //Navigate to roompage 
-  navigateToRoomPage(context,int houseId) {
-     Navigator.pushNamed(
-        context,
-        '/room-page',
-        arguments: houseId
-      );
+  //Navigate to roompage
+  navigateToRoomPage(context, int houseId) {
+    Navigator.pushNamed(context, '/room-page', arguments: houseId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tbBGColor,
-      appBar: CustomAppBar(namePage: "House Pages",),
+      appBar: const HomeAppBar(),
       body: Stack(
         children: [
           Container(
@@ -103,19 +140,22 @@ class HomePage extends StatefulWidget {
                     child: ListView.builder(
                       itemCount: houses?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
-                          return Container(
+                        return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
                             child: HouseItem(
                               house: houses![index],
-                              removeHouseFuntion:() {
+                              removeHouseFuntion: () {
                                 removeHouse(index);
                               },
+                              editHouseFuntion: () {
+                                editHome(houses![index], index);
+                              },
                               navigateToRoomPage: () {
-                                navigateToRoomPage(context,houses![index].id);
-                              },)
-                        );
+                                navigateToRoomPage(context, index);
+                              },
+                            ));
                       },
                     ),
                   )
@@ -132,7 +172,7 @@ class HomePage extends StatefulWidget {
                     right: 20,
                   ),
                   child: ElevatedButton(
-                    onPressed: () =>  createNewHome(),
+                    onPressed: () => createNewHome(),
                     style: ElevatedButton.styleFrom(
                       alignment: Alignment.bottomLeft,
                       minimumSize: const Size(60, 60),
@@ -177,5 +217,4 @@ class HomePage extends StatefulWidget {
       ),
     );
   }
-  
 }

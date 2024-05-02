@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/model/house.dart';
-
 class HouseItem extends StatelessWidget {
 
   House house;
 
   VoidCallback removeHouseFuntion;
+  VoidCallback editHouseFuntion;
   VoidCallback navigateToRoomPage;
 
   HouseItem(
       {super.key,
       required this.house,
+      required this.editHouseFuntion,
       required this.removeHouseFuntion,
       required this.navigateToRoomPage});
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +66,12 @@ class HouseItem extends StatelessWidget {
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           onTap: removeHouseFuntion,
-                          child: const Text('Delete'),
+                          child: const Text('Xoá'),
                         ),
-                         const PopupMenuItem(
+                          PopupMenuItem(
+                          onTap: editHouseFuntion,
                           value: 'edit',
-                          child: Text('Edit'),
+                          child: const Text('Sửa'),
                         )
                       ],
                     ),

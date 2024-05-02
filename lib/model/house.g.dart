@@ -17,33 +17,30 @@ class HouseAdapter extends TypeAdapter<House> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return House(
+      fields[0] as String,
       fields[1] as String,
-      fields[2] as String,
-      fields[3] as int,
-      fields[4] as int,
-      fields[5] as int,
-      (fields[6] as List).cast<int>(),
-    )..id = fields[0] as int;
+      fields[2] as int,
+      fields[3] == null ? 3500 : fields[3] as int,
+      fields[4] == null ? 17000 : fields[4] as int,
+    )..rooms = (fields[5] as HiveList).castHiveList();
   }
 
   @override
   void write(BinaryWriter writer, House obj) {
     writer
-      ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.address)
-      ..writeByte(2)
-      ..write(obj.nameOwner)
-      ..writeByte(3)
-      ..write(obj.availableRooms)
-      ..writeByte(4)
-      ..write(obj.electricityPrice)
-      ..writeByte(5)
-      ..write(obj.waterPrice)
       ..writeByte(6)
-      ..write(obj.roomIds);
+      ..writeByte(0)
+      ..write(obj.address)
+      ..writeByte(1)
+      ..write(obj.nameOwner)
+      ..writeByte(2)
+      ..write(obj.availableRooms)
+      ..writeByte(3)
+      ..write(obj.electricityPrice)
+      ..writeByte(4)
+      ..write(obj.waterPrice)
+      ..writeByte(5)
+      ..write(obj.rooms);
   }
 
   @override

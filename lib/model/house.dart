@@ -1,35 +1,33 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:room_manager/database/database_setting.dart';
+import 'package:room_manager/model/room.dart';
 
 part 'house.g.dart';
 
 @HiveType(typeId: 1, adapterName: "HouseAdapter")
 class House extends HiveObject{
-  static int _lastId = 0; // Static variable to keep track of last used ID
-
-  @HiveField(0)
-   late int id; // No longer marked as 'late'
   
-  @HiveField(1)
+  @HiveField(0)
    late String address; 
 
-  @HiveField(2)
+  @HiveField(1)
    late String nameOwner;
 
-  @HiveField(3)
+  @HiveField(2)
    late int availableRooms;
 
-   @HiveField(4)
+   @HiveField(3 ,defaultValue: 3500)
    late int electricityPrice;
 
-   @HiveField(5)
+   @HiveField(4 ,defaultValue: 17000)
    late int waterPrice;
 
-  @HiveField(6)
-   late List<int> roomIds;
+  @HiveField(5)
+  late HiveList<Room> rooms;
    
 
   // Constructor
-  House(this.address, this.nameOwner, this.availableRooms, this.electricityPrice, this.waterPrice , this.roomIds) {
-    id = ++_lastId; // Increment the last used ID and assign it to the current instance
+  House(this.address, this.nameOwner, this.availableRooms, this.electricityPrice, this.waterPrice){
+    rooms = HiveList(roomBox);
   }
 }
