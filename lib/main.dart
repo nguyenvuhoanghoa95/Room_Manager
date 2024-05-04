@@ -18,22 +18,24 @@ void main() async {
   Hive.registerAdapter(ActivityAdapter());
   Hive.registerAdapter(InvoiceAdapter());
 
+
+
   if (!Hive.isBoxOpen(houseTableName)) {
-    roomBox = await Hive.openBox<Room>(roomTableName);
-    houseBox = await Hive.openBox<House>(houseTableName);
     roomActivitysBox = await Hive.openBox<Activity>(roomActivitysTableName);
     invoiceBox = await Hive.openBox<Invoice>(invoiceTableName);
+    roomBox = await Hive.openBox<Room>(roomTableName);
+    houseBox = await Hive.openBox<House>(houseTableName);
   }
+
+  
   // houseBox.clear();
   // roomBox.clear();
 
-  
-
   if (houseBox.isEmpty && roomBox.isEmpty) {
     List<Room> newRooms = [
-      Room(DateTime.now(), 301, "Nguyễn Vũ Hoàng Hóa", 0.0, 0.0, 0, 0, false),
-      Room(DateTime.now(), 302, "Nguyễn Lê Đăng Duazn", 0.0, 0.0, 0, 0, false),
-      Room(DateTime.now(), 303, "Lê Minh", 0.0, 0.0, 0, 0, false)
+      Room(DateTime.now(), 301, "Nguyễn Vũ Hoàng Hóa"),
+      Room(DateTime.now(), 302, "Nguyễn Lê Đăng Duazn"),
+      Room(DateTime.now(), 303, "Lê Minh")
     ];
     roomBox.addAll(newRooms);
     List<House> newHouses = [
@@ -42,7 +44,10 @@ void main() async {
       House('234 Maple St', 'David Wilson', 5, 3500, 1700),
     ];
     houseBox.addAll(newHouses);
-    houseBox.values.first.rooms.addAll(roomBox.values);
+    
+    var house = houseBox.values.first;
+    house.rooms.addAll(newRooms);
+    house.save();
   }
 
   runApp(const MyApp());

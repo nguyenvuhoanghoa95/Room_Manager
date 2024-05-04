@@ -16,25 +16,25 @@ class Room extends HiveObject {
   late String roomRenterName;
 
   @HiveField(3 , defaultValue: 0.0)
-  late double amountOfRoom;
+  double? amountOfRoom;
 
   @HiveField(4, defaultValue: 0.0)
-  late double totalAmountOwed;
+  double? totalAmountOwed;
 
   @HiveField(5)
-  late int currentElectricityNumber;
+  int? currentElectricityNumber;
 
   @HiveField(6)
-  late int currentWaterNumber;
+  int? currentWaterNumber;
 
   @HiveField(7)
   late HiveList<Invoice> invoices;
 
   @HiveField(8 , defaultValue: false)
-  late bool status;
+  bool? status;
 
   // Constructor
-  Room(this.rentDueDate, this.roomNumber, this.roomRenterName, this.amountOfRoom, this.totalAmountOwed, this.currentElectricityNumber, this.currentWaterNumber, this.status){
+  Room(this.rentDueDate, this.roomNumber, this.roomRenterName){
     invoices = HiveList(invoiceBox);
   }
 }

@@ -5,10 +5,12 @@ import '../button/my_button.dart';
 
 class ElecAndWaterDialog extends StatelessWidget {
 
-  final VoidCallback? create;
+  final electricPriceController;
+  final waterPriceController;
+  final VoidCallback? edit;
   final VoidCallback? cancel;
 
-  const ElecAndWaterDialog({super.key, required this.create, required this.cancel});
+  const ElecAndWaterDialog({super.key, required this.edit, required this.cancel, this.electricPriceController, this.waterPriceController});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class ElecAndWaterDialog extends StatelessWidget {
             ),
             //text to input value
             TextField(
-              // controller: addressController,
+              controller: electricPriceController,
               decoration: InputDecoration(
                 labelText: 'Đơn Giá Điện',
                 filled: true,
@@ -42,9 +44,11 @@ class ElecAndWaterDialog extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
               ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             TextField(
-              // controller: availableRoomsController,
+              controller: waterPriceController,
               decoration: InputDecoration(
                 labelText: 'Đơn Giá Nước',
                 filled: true,
@@ -64,14 +68,14 @@ class ElecAndWaterDialog extends StatelessWidget {
                 // save button
                 Expanded(
                     child: MyButton(
-                        text: "Create", color: Colors.purple,onPressed: (){})),
+                        text: "Lưu", color: Colors.purple,onPressed: () => edit!())),
                 const SizedBox(
                   width: 40,
                 ),
                 // close button
                 Expanded(
                     child: MyButton(
-                        text: "Cancel", color: Colors.purple,onPressed: () => cancel!())),
+                        text: "Hủy", color: Colors.purple,onPressed: () => cancel!())),
               ],
             )
           ],

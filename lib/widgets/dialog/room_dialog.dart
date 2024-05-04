@@ -4,24 +4,20 @@ import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/widgets/button/my_button.dart';
 
 class RoomDialog extends StatefulWidget {
- final VoidCallback create;
- final VoidCallback cancel;
+  final VoidCallback create;
+  final VoidCallback cancel;
 
-  // final addressController;
-  // final nameOwnerController;
-  // final availableRoomsController;
-  // final electricityPriceController;
-  // final waterPriceController;
+  final roomNameController;
+  final datePickerController;
+  final renterController;
 
   const RoomDialog({
     super.key,
     required this.create,
     required this.cancel,
-    // this.addressController,
-    // this.nameOwnerController,
-    // this.availableRoomsController,
-    // this.electricityPriceController,
-    // this.waterPriceController
+    required this.roomNameController,
+    required this.datePickerController,
+    required this.renterController,
   });
 
   @override
@@ -31,7 +27,9 @@ class RoomDialog extends StatefulWidget {
 class _RoomDialog extends State<RoomDialog> {
   late VoidCallback create;
   late VoidCallback cancel;
-  final TextEditingController _dateController = TextEditingController();
+  late final  _dateController = widget.datePickerController ;
+  late final  _roomNameController = widget.roomNameController;
+  late final  _renterController = widget.renterController;
   DateTime selectedDate = DateTime.now();
 
   @override
@@ -41,10 +39,7 @@ class _RoomDialog extends State<RoomDialog> {
     cancel = widget.cancel;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    
-    Future<void> selectDate() async {
+  Future<void> selectDate() async {
       var pickerDate = await showDatePicker(
           context: context,
           initialDate: DateTime.now(),
@@ -57,6 +52,9 @@ class _RoomDialog extends State<RoomDialog> {
       }
     }
 
+
+  @override
+  Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: tbBGColor,
       content: SizedBox(
@@ -76,7 +74,7 @@ class _RoomDialog extends State<RoomDialog> {
             ),
             //text to input value
             TextField(
-              // controller: addressController,
+              controller: _roomNameController,
               decoration: InputDecoration(
                 labelText: 'Tên Phòng',
                 filled: true,
@@ -87,6 +85,8 @@ class _RoomDialog extends State<RoomDialog> {
                   borderSide: BorderSide.none,
                 ),
               ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
 
             TextField(
@@ -109,7 +109,7 @@ class _RoomDialog extends State<RoomDialog> {
               },
             ),
             TextField(
-              // controller: availableRoomsController,
+              controller: _renterController,
               decoration: InputDecoration(
                 labelText: 'Tên người thêu',
                 filled: true,
@@ -120,8 +120,6 @@ class _RoomDialog extends State<RoomDialog> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             //button --> save and close
             Row(
@@ -129,14 +127,14 @@ class _RoomDialog extends State<RoomDialog> {
                 // save button
                 Expanded(
                     child: MyButton(
-                        text: "Create", color: tbBlue,onPressed: create)),
+                        text: "Create", color: tbBlue, onPressed: () => create())),
                 const SizedBox(
                   width: 40,
                 ),
                 // close button
                 Expanded(
                     child: MyButton(
-                        text: "Cancel", color: tdRed,onPressed: cancel)),
+                        text: "Cancel", color: tdRed, onPressed: ()=> cancel())),
               ],
             )
           ],

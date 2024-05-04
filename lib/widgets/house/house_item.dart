@@ -3,13 +3,13 @@ import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/model/house.dart';
 class HouseItem extends StatelessWidget {
 
-  House house;
+  final House house;
 
-  VoidCallback removeHouseFuntion;
-  VoidCallback editHouseFuntion;
-  VoidCallback navigateToRoomPage;
+  final VoidCallback removeHouseFuntion;
+  final VoidCallback editHouseFuntion;
+  final VoidCallback navigateToRoomPage;
 
-  HouseItem(
+  const HouseItem(
       {super.key,
       required this.house,
       required this.editHouseFuntion,
@@ -65,14 +65,14 @@ class HouseItem extends StatelessWidget {
                       position: PopupMenuPosition.under,
                       itemBuilder: (context) => [
                         PopupMenuItem(
-                          onTap: removeHouseFuntion,
-                          child: const Text('Xoá'),
-                        ),
-                          PopupMenuItem(
                           onTap: editHouseFuntion,
                           value: 'edit',
-                          child: const Text('Sửa'),
-                        )
+                          child: const Text('Sửa thông tin'),
+                        ),
+                        PopupMenuItem(
+                          onTap: removeHouseFuntion,
+                          child: const Text('Xoá nhà'),
+                        ),
                       ],
                     ),
             ],

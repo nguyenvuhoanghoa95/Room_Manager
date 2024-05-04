@@ -20,12 +20,13 @@ class RoomAdapter extends TypeAdapter<Room> {
       fields[0] as DateTime,
       fields[1] as int,
       fields[2] as String,
-      fields[3] == null ? 0.0 : fields[3] as double,
-      fields[4] == null ? 0.0 : fields[4] as double,
-      fields[5] as int,
-      fields[6] as int,
-      fields[8] == null ? false : fields[8] as bool,
-    )..invoices = (fields[7] as HiveList).castHiveList();
+    )
+      ..amountOfRoom = fields[3] == null ? 0.0 : fields[3] as double?
+      ..totalAmountOwed = fields[4] == null ? 0.0 : fields[4] as double?
+      ..currentElectricityNumber = fields[5] as int?
+      ..currentWaterNumber = fields[6] as int?
+      ..invoices = (fields[7] as HiveList).castHiveList()
+      ..status = fields[8] == null ? false : fields[8] as bool?;
   }
 
   @override

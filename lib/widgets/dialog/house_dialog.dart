@@ -11,10 +11,10 @@ class HouseDialog extends StatelessWidget {
   final waterPriceController;
 
   final VoidCallback? create;
-  VoidCallback cancel;
+  final VoidCallback cancel;
   final VoidCallback? edit;
 
-  HouseDialog(
+  const HouseDialog(
       {super.key,
       this.create,
       this.edit,

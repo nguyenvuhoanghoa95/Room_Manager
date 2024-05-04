@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/database/database_setting.dart';
+import 'package:room_manager/model/house.dart';
 import 'package:room_manager/model/room.dart';
 import 'package:room_manager/widgets/appbar/room_appbar.dart';
 import 'package:room_manager/widgets/dialog/room_dialog.dart';
@@ -13,71 +14,64 @@ class RoomPage extends StatefulWidget {
   State<RoomPage> createState() => _RoomPageState();
 }
 
-Widget searchBox() {
-  return Container(
-    decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(20)),
-    child: const TextField(
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(0),
-        prefixIcon: Icon(
-          Icons.search,
-          color: tbBlack,
-          size: 20,
-        ),
-        prefixIconConstraints: BoxConstraints(
-          maxHeight: 20,
-          minWidth: 25,
-        ),
-        border: InputBorder.none,
-        hintText: 'Search',
-        hintStyle: TextStyle(color: tbGrey),
-      ),
-    ),
-  );
-}
-
 class _RoomPageState extends State<RoomPage> {
-  int? houseId;
+  House? house;
   List<Room>? rooms;
+  final _electricityPriceController = TextEditingController();
+  final _waterPriceController = TextEditingController();
+  final _roomNameController = TextEditingController();
+  final _datePickerController = TextEditingController();
+  final _renterController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     Future.delayed(Duration.zero, () {
-      houseId = ModalRoute.of(context)!.settings.arguments as int?;
-      
-      // setState(() {
-      //   rooms = roomBox.values
-      //     .where((element) => element.houseId == houseId)
-      //     .toList();
-      // });
+      house = ModalRoute.of(context)!.settings.arguments as House?;
+      _electricityPriceController.text = "${house?.electricityPrice}";
+      _waterPriceController.text = "${house?.waterPrice}";
+      setState(() {
+        rooms = house!.rooms.toList();
+      });
     });
   }
 
-  //save new home
-  void saveNewRoom() {
-    //   if(_addressController.text.isNotEmpty &&
-    //   _nameOwnerController.text.isNotEmpty &&
-    //   _availableRoomsController.text.isNotEmpty &&
-    //   _electricityPriceController.text.isNotEmpty &&
-    //   _waterPriceController.text.isNotEmpty){
-    //   houseBox.add(
-    //     House(_addressController.text,
-    //           _nameOwnerController.text,
-    //           int.parse(_availableRoomsController.text),
-    //           int.parse(_electricityPriceController.text),
-    //           int.parse(_waterPriceController.text),[])
-    //   );
-    //   _addressController.clear();
-    //   _nameOwnerController.clear();
-    //   _availableRoomsController.clear();
-    //   _electricityPriceController.clear();
-    //   _waterPriceController.clear();
-    //   }
-    // setState(() {
-    //   houses = List<House>.from(houseBox.values);
-    // });
+  //save
+  saveRoom({int? index}) {
+    if (_roomNameController.text.isNotEmpty &&
+        _datePickerController.text.isNotEmpty &&
+        _renterController.text.isNotEmpty) {
+      if (index == null) {
+        //Add action
+        addRoom();
+      } else {
+        //Edit action
+        // var house = editHouse(houses![index!]);
+        // houseBox.putAt(index, house);
+      }
+    }
+    setState(() {
+      rooms = List<Room>.from(house!.rooms);
+    });
+    cancel();
+  }
+
+  addRoom() {
+    var newRoom = Room(
+        DateTime.parse(_datePickerController.text),
+        int.parse(_roomNameController.text),
+        _renterController.text);
+    roomBox.add(newRoom);
+    house?.rooms.add(newRoom);
+    house?.save();
+  }
+
+  //Clearn data in controller
+  cancel() {
+    _roomNameController.clear();
+    _datePickerController.clear();
+    _renterController.clear();
     Navigator.of(context).pop();
   }
 
@@ -87,8 +81,11 @@ class _RoomPageState extends State<RoomPage> {
       context: context,
       builder: (context) {
         return RoomDialog(
-          create: saveNewRoom,
-          cancel: () => Navigator.of(context).pop(),
+          renterController:_renterController,
+          roomNameController: _roomNameController,
+          datePickerController: _datePickerController,
+          create: () => saveRoom(),
+          cancel: () => cancel(),
         );
       },
     );
@@ -104,20 +101,20 @@ class _RoomPageState extends State<RoomPage> {
     }
   }
 
- //Navigate to invoicePage
-  navigateToInvoicePage(int? roomId){
-     Navigator.pushNamed(
-        context,
-        '/invoice-page',
-        arguments: roomId
-      );
+  //Navigate to invoicePage
+  navigateToInvoicePage(int? roomId) {
+    Navigator.pushNamed(context, '/invoice-page', arguments: roomId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: tbBGColor,
-      appBar:const RoomAppBar(),
+      appBar: RoomAppBar(
+        house: house,
+        electricPriceController: _electricityPriceController,
+        waterPriceController: _waterPriceController,
+      ),
       body: Stack(
         children: [
           Container(
@@ -135,7 +132,8 @@ class _RoomPageState extends State<RoomPage> {
                             ),
                             child: RoomItem(
                                 room: rooms![index],
-                                navigateToInvoicePage: () => navigateToInvoicePage(index),
+                                navigateToInvoicePage: () =>
+                                    navigateToInvoicePage(index),
                                 removeRoomFuntion: () => removeRoom(index)));
                       },
                     ),
@@ -171,6 +169,30 @@ class _RoomPageState extends State<RoomPage> {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget searchBox() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      child: const TextField(
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.all(0),
+          prefixIcon: Icon(
+            Icons.search,
+            color: tbBlack,
+            size: 20,
+          ),
+          prefixIconConstraints: BoxConstraints(
+            maxHeight: 20,
+            minWidth: 25,
+          ),
+          border: InputBorder.none,
+          hintText: 'Search',
+          hintStyle: TextStyle(color: tbGrey),
+        ),
       ),
     );
   }

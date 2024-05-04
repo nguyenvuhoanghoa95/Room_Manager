@@ -22,44 +22,30 @@ class _HomePageState extends State<HomePage> {
 
   List<House>? houses = houseBox.values.toList();
 
-  //save home
-  saveHome({int? index = 0}) {
+  //save 
+  saveHouse({int? index}) {
     if (_addressController.text.isNotEmpty &&
         _nameOwnerController.text.isNotEmpty &&
         _availableRoomsController.text.isNotEmpty &&
         _electricityPriceController.text.isNotEmpty &&
         _waterPriceController.text.isNotEmpty) {
-      if (index == 0) {
-        houseBox.add(House(
-            _addressController.text,
-            _nameOwnerController.text,
-            int.parse(_availableRoomsController.text),
-            int.parse(_electricityPriceController.text),
-            int.parse(_waterPriceController.text)));
-      } else {
-        houseBox.putAt(
-            index!,
-            House(
-                _addressController.text,
-                _nameOwnerController.text,
-                int.parse(_availableRoomsController.text),
-                int.parse(_electricityPriceController.text),
-                int.parse(_waterPriceController.text)));
-      }
-      _addressController.clear();
-      _nameOwnerController.clear();
-      _availableRoomsController.clear();
-      _electricityPriceController.clear();
-      _waterPriceController.clear();
+        if (index == null) {
+          //Add action
+          addHouse();
+        } else {
+          //Edit action
+          var house = editHouse(houses![index!]);
+          houseBox.putAt(index, house);
+        }
     }
     setState(() {
       houses = List<House>.from(houseBox.values);
     });
-    Navigator.of(context).pop();
+    cancel();
   }
 
   // Create new home
-  createNewHome() {
+  createDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -69,24 +55,24 @@ class _HomePageState extends State<HomePage> {
           nameOwnerController: _nameOwnerController,
           electricityPriceController: _electricityPriceController,
           waterPriceController: _waterPriceController,
-          create:() => saveHome(),
+          create: () => saveHouse(),
           cancel: () => cancel(),
         );
       },
     );
   }
 
-  cancel(){
-     _addressController.clear();
-      _nameOwnerController.clear();
-      _availableRoomsController.clear();
-      _electricityPriceController.clear();
-      _waterPriceController.clear();
-    Navigator.of(context).pop();
+  addHouse() {
+    houseBox.add(House(
+        _addressController.text,
+        _nameOwnerController.text,
+        int.parse(_availableRoomsController.text),
+        int.parse(_electricityPriceController.text),
+        int.parse(_waterPriceController.text)));
   }
 
-  //Edit house
-  editHome(House house, int index) {
+  //Call edit house dialog
+  editDialog(House house, int index) {
     showDialog(
       context: context,
       builder: (context) {
@@ -104,14 +90,34 @@ class _HomePageState extends State<HomePage> {
           nameOwnerController: _nameOwnerController,
           electricityPriceController: _electricityPriceController,
           waterPriceController: _waterPriceController,
-          edit: () => saveHome(index: index),
+          edit: () => saveHouse(index: index),
           cancel: () => cancel(),
         );
       },
     );
   }
 
-  // Remove home
+  editHouse(House editHouse) {
+    editHouse.address = _addressController.text;
+    editHouse.nameOwner = _nameOwnerController.text;
+    editHouse.address = _addressController.text;
+    editHouse.availableRooms = int.parse(_availableRoomsController.text);
+    editHouse.electricityPrice = int.parse(_electricityPriceController.text);
+    editHouse.waterPrice = int.parse(_waterPriceController.text);
+    return editHouse;
+  }
+
+  //Clearn data in controller
+  cancel() {
+    _addressController.clear();
+    _nameOwnerController.clear();
+    _availableRoomsController.clear();
+    _electricityPriceController.clear();
+    _waterPriceController.clear();
+    Navigator.of(context).pop();
+  }
+
+  // Remove house
   removeHouse(int index) {
     houseBox.deleteAt(index);
     setState(() {
@@ -120,8 +126,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   //Navigate to roompage
-  navigateToRoomPage(context, int houseId) {
-    Navigator.pushNamed(context, '/room-page', arguments: houseId);
+  navigateToRoomPage(context, House house) {
+    Navigator.pushNamed(context, '/room-page', arguments: house);
   }
 
   @override
@@ -150,10 +156,10 @@ class _HomePageState extends State<HomePage> {
                                 removeHouse(index);
                               },
                               editHouseFuntion: () {
-                                editHome(houses![index], index);
+                                editDialog(houses![index], index);
                               },
                               navigateToRoomPage: () {
-                                navigateToRoomPage(context, index);
+                                navigateToRoomPage(context, houses![index]);
                               },
                             ));
                       },
@@ -172,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                     right: 20,
                   ),
                   child: ElevatedButton(
-                    onPressed: () => createNewHome(),
+                    onPressed: () => createDialog(),
                     style: ElevatedButton.styleFrom(
                       alignment: Alignment.bottomLeft,
                       minimumSize: const Size(60, 60),
