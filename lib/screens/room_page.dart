@@ -47,8 +47,7 @@ class _RoomPageState extends State<RoomPage> {
         addRoom();
       } else {
         //Edit action
-        // var house = editHouse(houses![index!]);
-        // houseBox.putAt(index, house);
+        editRoom(rooms![index]);
       }
     }
     setState(() {
@@ -57,14 +56,57 @@ class _RoomPageState extends State<RoomPage> {
     cancel();
   }
 
+  // Create new home
+  createNewRoom() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return RoomDialog(
+          renterController: _renterController,
+          roomNameController: _roomNameController,
+          datePickerController: _datePickerController,
+          create: () => saveRoom(),
+          cancel: () => cancel(),
+        );
+      },
+    );
+  }
+
   addRoom() {
-    var newRoom = Room(
-        DateTime.parse(_datePickerController.text),
-        int.parse(_roomNameController.text),
-        _renterController.text);
+    var newRoom = Room(DateTime.parse(_datePickerController.text),
+        int.parse(_roomNameController.text), _renterController.text);
     roomBox.add(newRoom);
     house?.rooms.add(newRoom);
     house?.save();
+  }
+
+  editRoom(Room editRoom) {
+    editRoom.rentDueDate = DateTime.parse(_datePickerController.text);
+    editRoom.roomRenterName = _renterController.text;
+    editRoom.roomNumber = int.parse(_roomNameController.text);
+    return editRoom.save();
+  }
+
+  //Call edit house dialog
+  editDialog(Room room, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        //Set up data
+        _renterController.text = room.roomRenterName;
+        _datePickerController.text = room.rentDueDate.toString().split(" ")[0];
+        _roomNameController.text = "${room.roomNumber}";
+
+        //Open dialog
+        return RoomDialog(
+          renterController: _renterController,
+          roomNameController: _roomNameController,
+          datePickerController: _datePickerController,
+          edit: () => saveRoom(index: index),
+          cancel: () => cancel(),
+        );
+      },
+    );
   }
 
   //Clearn data in controller
@@ -73,22 +115,6 @@ class _RoomPageState extends State<RoomPage> {
     _datePickerController.clear();
     _renterController.clear();
     Navigator.of(context).pop();
-  }
-
-  // Create new home
-  void createNewRoom() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return RoomDialog(
-          renterController:_renterController,
-          roomNameController: _roomNameController,
-          datePickerController: _datePickerController,
-          create: () => saveRoom(),
-          cancel: () => cancel(),
-        );
-      },
-    );
   }
 
   // Remove room
@@ -102,8 +128,8 @@ class _RoomPageState extends State<RoomPage> {
   }
 
   //Navigate to invoicePage
-  navigateToInvoicePage(int? roomId) {
-    Navigator.pushNamed(context, '/invoice-page', arguments: roomId);
+  navigateToInvoicePage(Room room) {
+    Navigator.pushNamed(context, '/invoice-page', arguments: room);
   }
 
   @override
@@ -133,8 +159,10 @@ class _RoomPageState extends State<RoomPage> {
                             child: RoomItem(
                                 room: rooms![index],
                                 navigateToInvoicePage: () =>
-                                    navigateToInvoicePage(index),
-                                removeRoomFuntion: () => removeRoom(index)));
+                                    navigateToInvoicePage(rooms![index]),
+                                editFuntion: () =>
+                                    editDialog(rooms![index], index),
+                                removeFuntion: () => removeRoom(index)));
                       },
                     ),
                   )

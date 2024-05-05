@@ -1,22 +1,23 @@
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:room_manager/model/activity.dart';
+
+import '../database/database_setting.dart';
 
 part 'invoice.g.dart';
 
-@HiveType(typeId: 5 , adapterName: "InvoiceAdapter" ) 
+@HiveType(typeId: 5, adapterName: "InvoiceAdapter")
 class Invoice extends HiveObject {
-  static int _lastId = 0; // Static variable to keep track of last used ID
-
   @HiveField(0)
-  late int id;
-
-  @HiveField(1)
   late int newElectricityNumber;
 
+  @HiveField(1)
+  late int newWaterNumber;
+
   @HiveField(2)
-  late int waterNumber;
+  int? currentElectricityNumber;
 
   @HiveField(3)
-  late int roomId;
+  int? currentWaterNumber;
 
   @HiveField(4)
   late DateTime fromDate;
@@ -25,16 +26,24 @@ class Invoice extends HiveObject {
   late DateTime toDate;
 
   @HiveField(6)
-  late double amountAlreadyPay;
+  double amountAlreadyPay;
 
   @HiveField(7)
-  late double amountOwed;
+  double? amountOwed;
 
   @HiveField(8)
-  late String roomActivityString;
+  HiveList<Activity>? activities;
 
   // Constructor
-  Invoice(this.newElectricityNumber, this.waterNumber, this.roomId, this.fromDate, this.toDate, this.amountAlreadyPay, this.amountOwed, this.roomActivityString){
-    id = ++_lastId; // Increment the last used ID and assign it to the current instance
+  Invoice(this.newElectricityNumber, this.newWaterNumber, this.fromDate, this.toDate, this.amountAlreadyPay) {
+    if (invoiceBox.isNotEmpty) {
+      var lastInvoice = invoiceBox.values.last;
+      if (lastInvoice.currentElectricityNumber != null && lastInvoice.currentWaterNumber != null) {
+        currentElectricityNumber = lastInvoice.currentElectricityNumber;
+        currentWaterNumber = lastInvoice.currentWaterNumber;
+      }
+      amountAlreadyPay = lastInvoice.amountAlreadyPay;
+    }
+    activities = HiveList(invoiceBox);
   }
 }

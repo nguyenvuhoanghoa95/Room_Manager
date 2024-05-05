@@ -4,8 +4,9 @@ import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/widgets/button/my_button.dart';
 
 class RoomDialog extends StatefulWidget {
-  final VoidCallback create;
+  final VoidCallback? create;
   final VoidCallback cancel;
+  final VoidCallback? edit;
 
   final roomNameController;
   final datePickerController;
@@ -13,7 +14,8 @@ class RoomDialog extends StatefulWidget {
 
   const RoomDialog({
     super.key,
-    required this.create,
+    this.create,
+    this.edit,
     required this.cancel,
     required this.roomNameController,
     required this.datePickerController,
@@ -25,8 +27,9 @@ class RoomDialog extends StatefulWidget {
 }
 
 class _RoomDialog extends State<RoomDialog> {
-  late VoidCallback create;
+  late VoidCallback? create;
   late VoidCallback cancel;
+  late VoidCallback? edit;
   late final  _dateController = widget.datePickerController ;
   late final  _roomNameController = widget.roomNameController;
   late final  _renterController = widget.renterController;
@@ -35,6 +38,7 @@ class _RoomDialog extends State<RoomDialog> {
   @override
   void initState() {
     super.initState();
+    edit = widget.edit;
     create = widget.create;
     cancel = widget.cancel;
   }
@@ -127,14 +131,14 @@ class _RoomDialog extends State<RoomDialog> {
                 // save button
                 Expanded(
                     child: MyButton(
-                        text: "Create", color: tbBlue, onPressed: () => create())),
+                        text: "Lưu", color: tbBlue, onPressed: () =>  create != null ? create!() : edit!())),
                 const SizedBox(
                   width: 40,
                 ),
                 // close button
                 Expanded(
                     child: MyButton(
-                        text: "Cancel", color: tdRed, onPressed: ()=> cancel())),
+                        text: "Hủy", color: tdRed, onPressed: ()=> cancel())),
               ],
             )
           ],

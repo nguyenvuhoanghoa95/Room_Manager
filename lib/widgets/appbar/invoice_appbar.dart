@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
+import 'package:room_manager/model/room.dart';
 
 class InvoiceAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final Room? room;
+  final String title;
+
+  
   const InvoiceAppBar({
     super.key,
+    this.room, 
+    required this.title,
   });
+
+  
 
   @override
   Widget build(BuildContext context) {
+
+    //Navigate to invoicePage
+    navigateToInvoiceCreatePage(Room? room){
+        Navigator.pushNamed(
+          context,
+          '/invoice-page/Create',
+          arguments: room
+        );
+    }
+
     return AppBar(
       backgroundColor: tbBGColor,
-      title: const Text(
-        "Danh Sách Hoá Đơn",
-        style: TextStyle(
+      title:  Text(
+        title,
+        style:const TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.w500,
         ),
@@ -27,15 +46,23 @@ class InvoiceAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       elevation: 0.00,
       actions: [
-      PopupMenuButton(
+      room != null ? PopupMenuButton(
+                    position: PopupMenuPosition.under,
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        onTap: () => navigateToInvoiceCreatePage(room),
+                        child: const Text('Tạo hóa đơn mới'),
+                      ),
+                    ],
+                  ) : PopupMenuButton(
                     position: PopupMenuPosition.under,
                     itemBuilder: (context) => [
                       // PopupMenuItem(
-                        // onTap: () => openDialog(context),
-                        // child: const Text('Thêm giá điện nước'),
+                      //   onTap: () => navigateToInvoiceCreatePage(room),
+                      //   child: const Text('Tạo hóa đơn mới'),
                       // ),
                     ],
-                  ),
+                  ) 
       ],
     );
   }

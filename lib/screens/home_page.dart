@@ -34,8 +34,7 @@ class _HomePageState extends State<HomePage> {
           addHouse();
         } else {
           //Edit action
-          var house = editHouse(houses![index!]);
-          houseBox.putAt(index, house);
+          editHouse(houses![index]);
         }
     }
     setState(() {
@@ -104,7 +103,7 @@ class _HomePageState extends State<HomePage> {
     editHouse.availableRooms = int.parse(_availableRoomsController.text);
     editHouse.electricityPrice = int.parse(_electricityPriceController.text);
     editHouse.waterPrice = int.parse(_waterPriceController.text);
-    return editHouse;
+    return editHouse.save();
   }
 
   //Clearn data in controller

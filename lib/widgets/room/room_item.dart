@@ -5,14 +5,16 @@ import 'package:room_manager/model/room.dart';
 class RoomItem extends StatelessWidget {
   
   final Room room;
-  final VoidCallback removeRoomFuntion;
+  final VoidCallback removeFuntion;
+  final VoidCallback editFuntion;
   final VoidCallback navigateToInvoicePage;
 
   const RoomItem(
       {super.key,
       required this.room,
-      required this.removeRoomFuntion,
-      required this.navigateToInvoicePage});
+      required this.removeFuntion,
+      required this.navigateToInvoicePage,
+      required this.editFuntion});
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +56,11 @@ class RoomItem extends StatelessWidget {
                       position: PopupMenuPosition.under,
                       itemBuilder: (context) => [
                         PopupMenuItem(
-                          onTap: removeRoomFuntion,
+                          onTap: ()=> editFuntion(),
                           child: const Text('Sửa thông tin'),
                         ),
                         PopupMenuItem(
-                          onTap: removeRoomFuntion,
+                          onTap: removeFuntion,
                           child: const Text('Xóa phòng'),
                         )
                       ],

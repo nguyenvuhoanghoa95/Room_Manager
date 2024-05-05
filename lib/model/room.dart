@@ -15,22 +15,13 @@ class Room extends HiveObject {
   @HiveField(2)
   late String roomRenterName;
 
-  @HiveField(3 , defaultValue: 0.0)
-  double? amountOfRoom;
-
-  @HiveField(4, defaultValue: 0.0)
+  @HiveField(3, defaultValue: 0.0)
   double? totalAmountOwed;
 
-  @HiveField(5)
-  int? currentElectricityNumber;
-
-  @HiveField(6)
-  int? currentWaterNumber;
-
-  @HiveField(7)
+  @HiveField(4)
   late HiveList<Invoice> invoices;
 
-  @HiveField(8 , defaultValue: false)
+  @HiveField(5 , defaultValue: false)
   bool? status;
 
   // Constructor

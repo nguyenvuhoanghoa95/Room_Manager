@@ -31,19 +31,32 @@ void main() async {
   // houseBox.clear();
   // roomBox.clear();
 
+
   if (houseBox.isEmpty && roomBox.isEmpty) {
+    List<Invoice> invoice = [
+      Invoice(300, 123, DateTime.parse("2024-04-01"), DateTime.parse("2024-05-01"), 5500000),
+    ];
+    invoiceBox.addAll(invoice);
+
     List<Room> newRooms = [
       Room(DateTime.now(), 301, "Nguyễn Vũ Hoàng Hóa"),
       Room(DateTime.now(), 302, "Nguyễn Lê Đăng Duazn"),
       Room(DateTime.now(), 303, "Lê Minh")
     ];
     roomBox.addAll(newRooms);
+
+    var room = roomBox.values.first;
+    room.invoices.addAll(invoice);
+    room.save();
+
     List<House> newHouses = [
       House('123 Main St', 'John Doe', 2, 3500, 1700),
       House('456 Main St', 'Bob Johnson', 3, 3500, 1700),
       House('234 Maple St', 'David Wilson', 5, 3500, 1700),
     ];
     houseBox.addAll(newHouses);
+
+
     
     var house = houseBox.values.first;
     house.rooms.addAll(newRooms);
