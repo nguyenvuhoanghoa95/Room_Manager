@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:room_manager/model/activity.dart';
+import 'package:room_manager/model/room.dart';
 
 import '../database/database_setting.dart';
 
@@ -8,10 +9,10 @@ part 'invoice.g.dart';
 @HiveType(typeId: 5, adapterName: "InvoiceAdapter")
 class Invoice extends HiveObject {
   @HiveField(0)
-  late int newElectricityNumber;
+  int? newElectricityNumber;
 
   @HiveField(1)
-  late int newWaterNumber;
+  int? newWaterNumber;
 
   @HiveField(2)
   int? currentElectricityNumber;
@@ -20,13 +21,13 @@ class Invoice extends HiveObject {
   int? currentWaterNumber;
 
   @HiveField(4)
-  late DateTime fromDate;
+  DateTime? fromDate;
 
   @HiveField(5)
-  late DateTime toDate;
+  DateTime? toDate;
 
   @HiveField(6)
-  double amountAlreadyPay;
+  double? amountAlreadyPay;
 
   @HiveField(7)
   double? amountOwed;
@@ -34,16 +35,23 @@ class Invoice extends HiveObject {
   @HiveField(8)
   HiveList<Activity>? activities;
 
-  // Constructor
   Invoice(this.newElectricityNumber, this.newWaterNumber, this.fromDate, this.toDate, this.amountAlreadyPay) {
+    activities = HiveList(roomActivitysBox);
+  }
+
+  // Constructor
+  Invoice.createInvoice(Room room) {
     if (invoiceBox.isNotEmpty) {
-      var lastInvoice = invoiceBox.values.last;
-      if (lastInvoice.currentElectricityNumber != null && lastInvoice.currentWaterNumber != null) {
-        currentElectricityNumber = lastInvoice.currentElectricityNumber;
-        currentWaterNumber = lastInvoice.currentWaterNumber;
+      var lastInvoice = roomBox.get(room)?.invoices.last;
+      if (lastInvoice != null) {
+        if (lastInvoice.currentElectricityNumber != null &&
+            lastInvoice.currentWaterNumber != null) {
+          currentElectricityNumber = lastInvoice.currentElectricityNumber;
+          currentWaterNumber = lastInvoice.currentWaterNumber;
+        }
+        amountAlreadyPay = lastInvoice.amountAlreadyPay;
       }
-      amountAlreadyPay = lastInvoice.amountAlreadyPay;
     }
-    activities = HiveList(invoiceBox);
+    activities = HiveList(roomActivitysBox);
   }
 }

@@ -17,11 +17,11 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Invoice(
-      fields[0] as int,
-      fields[1] as int,
-      fields[4] as DateTime,
-      fields[5] as DateTime,
-      fields[6] as double,
+      fields[0] as int?,
+      fields[1] as int?,
+      fields[4] as DateTime?,
+      fields[5] as DateTime?,
+      fields[6] as double?,
     )
       ..currentElectricityNumber = fields[2] as int?
       ..currentWaterNumber = fields[3] as int?

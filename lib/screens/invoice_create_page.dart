@@ -18,6 +18,23 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   Invoice? invoice;
   final _formKey = GlobalKey<FormState>();
   String currentPayment = '';
+  String note = '';
+  String crrElecNum = '';
+  String crrWarNum = '';
+  String newElecNum = '';
+  String newWarNum = '';
+  TextEditingController? _dateController;
+  TextEditingController? _amoutController;
+  TextEditingController? _crrElecNumController;
+  TextEditingController? _crrWarNumController;
+  TextEditingController? _newElecNumController;
+  TextEditingController? _newWarNumController;
+  TextEditingController? _calculationController;
+  TextEditingController? _resultController;
+  TextEditingController? _netAmountController;
+  TextEditingController? _diffAmountController;
+  TextEditingController? _ownAmountController;
+  TextEditingController? _noteController;
 
   @override
   void initState() {
@@ -26,10 +43,11 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
     Future.delayed(Duration.zero, () {
       setState(() {
         var agument = ModalRoute.of(context)!.settings.arguments;
-        if(agument is Room){
-            room = agument;
-        }else{
-            invoice = agument as Invoice?;
+        if (agument is Room) {
+          room = agument;
+          invoice = Invoice.createInvoice(room!);
+        } else {
+          invoice = agument as Invoice?;
         }
       });
     });
@@ -42,26 +60,55 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
         firstDate: DateTime(2000),
         lastDate: DateTime(2100));
     if (pickerDate != null) {
-      // setState(() {
-      //   _dateController.text = pickerDate.toString().split(" ")[0];
-      // });
+      setState(() {
+        _dateController?.text = pickerDate.toString().split(" ")[0];
+      });
     }
   }
 
-  addNote() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return NoteDialog(
-            create: () {}, cancel: () => Navigator.of(context).pop());
-      },
-    );
+  addNote(BuildContext context) async {
+    _noteController = TextEditingController();
+
+    final result = await showDialog(
+        context: context, builder: (context) => NoteDialog(note: note));
+    if (result != null && result is String) {
+      setState(() {
+        note = result;
+        _noteController?.text = result;
+      });
+    }
+  }
+
+  onEdit() {
+    _calculationController = TextEditingController();
+    _resultController = TextEditingController();
+    _calculationController?.text = "";
+
+    if (crrElecNum != "" &&
+        crrWarNum != "" &&
+        newElecNum != "" &&
+        newWarNum != "") {
+      int electricityConsumed = int.parse(newElecNum) -
+          int.parse(crrElecNum);
+      int warterConsumed = int.parse(newWarNum) -
+          int.parse(crrWarNum);
+      setState(() {
+        _calculationController?.text =
+            "Số điện đã sử dụng : $electricityConsumed \n"
+            "Số nước đã sử dụng : $warterConsumed \n";
+        _resultController?.text =
+            "Tiền điện là : ${electricityConsumed * 3500} \n"
+            "Tiền nước là : ${warterConsumed * 17000}";
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const InvoiceAppBar(title: "Thêm hóa đơn",),
+      appBar: const InvoiceAppBar(
+        title: "Thêm hóa đơn",
+      ),
       backgroundColor: tbBGColor,
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -69,13 +116,11 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
             key: _formKey,
             child: ListView(
               shrinkWrap: true,
-              // padding: EdgeInsets.only(top: 10.0),
-              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    // controller: _dateController,
+                    controller: _dateController,
                     decoration: InputDecoration(
                         labelText: 'Ngày tạo hoá đơn',
                         filled: true,
@@ -97,6 +142,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
+                    controller: _amoutController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Tiền phòng',
@@ -110,6 +156,67 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     ),
                   ),
                 ),
+                Visibility(
+                  visible: invoice?.currentElectricityNumber == null &&
+                      invoice?.currentWaterNumber == null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            onEditingComplete: () {
+                              onEdit();
+                            },
+                              onChanged: (value) {
+                                crrElecNum = value;
+                              },
+                              controller: _crrElecNumController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: 'Số điện hiện tại',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            onEditingComplete: () {
+                              onEdit();
+                            },
+                              onChanged: (value) {
+                                crrWarNum = value;
+                              },
+                              controller: _crrWarNumController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: 'Số nước hiện tại',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -117,6 +224,13 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     children: [
                       Expanded(
                         child: TextFormField(
+                            onChanged: (value) {
+                              newElecNum = value;
+                            },
+                            onEditingComplete: () {
+                              onEdit();
+                            },
+                            controller: _newElecNumController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               labelText: 'Số điện mới',
@@ -137,6 +251,13 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       ),
                       Expanded(
                         child: TextFormField(
+                            onChanged: (value) {
+                              newWarNum = value;
+                            },
+                            onEditingComplete: () {
+                              onEdit();
+                            },
+                            controller: _newWarNumController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               labelText: 'Số nước mới',
@@ -155,6 +276,49 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     ],
                   ),
                 ),
+                Visibility(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: TextFormField(
+                              maxLines: null,
+                              controller: _calculationController,
+                              enabled: false,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        const Text(
+                          "=",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                              maxLines: null,
+                              controller: _resultController,
+                              enabled: false,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -162,6 +326,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     children: [
                       Expanded(
                         child: TextFormField(
+                            controller: _netAmountController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               labelText: 'Tiền mạng',
@@ -182,6 +347,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       ),
                       Expanded(
                         child: TextFormField(
+                            controller: _diffAmountController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               labelText: 'Thu khác',
@@ -203,6 +369,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
+                      controller: _ownAmountController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Tiền nợ',
@@ -221,8 +388,10 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    onTap: () => addNote(),
+                    controller: _noteController,
+                    onTap: () => addNote(context),
                     readOnly: true,
+                    maxLines: null,
                     decoration: InputDecoration(
                       labelText: 'Ghi chú...',
                       filled: true,
@@ -234,9 +403,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     ),
                   ),
                 ),
-                 Visibility(
-                   visible: room != null,
-                   child: Padding(
+                Visibility(
+                  visible: room != null,
+                  child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ElevatedButton(
                       onPressed: () {},
@@ -244,7 +413,8 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         minimumSize:
                             MaterialStateProperty.all(const Size(150, 60)),
                         elevation: MaterialStateProperty.all(0),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
@@ -252,12 +422,12 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       ),
                       child: const Text(
                         "Tính Tiền",
-                        style:
-                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
-                                   ),
-                 ),
+                  ),
+                ),
                 Visibility(
                   visible: room == null,
                   child: Row(
@@ -323,8 +493,8 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                             minimumSize:
                                 MaterialStateProperty.all(const Size(150, 60)),
                             elevation: MaterialStateProperty.all(0),
-                            shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
@@ -343,8 +513,8 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                             minimumSize:
                                 MaterialStateProperty.all(const Size(150, 60)),
                             elevation: MaterialStateProperty.all(0),
-                            shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20.0),
                               ),

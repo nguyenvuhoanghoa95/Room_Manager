@@ -25,7 +25,6 @@ class House extends HiveObject{
   @HiveField(5)
   late HiveList<Room> rooms;
    
-
   // Constructor
   House(this.address, this.nameOwner, this.availableRooms, this.electricityPrice, this.waterPrice){
     rooms = HiveList(roomBox);
