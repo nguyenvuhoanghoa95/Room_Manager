@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
+import 'package:room_manager/util/invoice_helper.dart';
 import 'package:room_manager/widgets/appbar/invoice_appbar.dart';
 import 'package:room_manager/widgets/dialog/note_dialog.dart';
 
@@ -17,12 +20,26 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   Room? room;
   Invoice? invoice;
   final _formKey = GlobalKey<FormState>();
+  //Helper
+  var helper = InvoiceHelper();
+
+  //Field data
   String currentPayment = '';
   String note = '';
   String crrElecNum = '';
   String crrWarNum = '';
   String newElecNum = '';
   String newWarNum = '';
+  String roomAmount = '';
+  String internetAmount = '';
+  String ownAmount = '';
+  String anotherAmount = '';
+  int electricityConsumed = 0;
+  int warterConsumed = 0;
+  int totalAmount = 0;
+  List costList = [];
+
+  //Controller
   TextEditingController? _dateController;
   TextEditingController? _amoutController;
   TextEditingController? _crrElecNumController;
@@ -30,7 +47,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   TextEditingController? _newElecNumController;
   TextEditingController? _newWarNumController;
   TextEditingController? _calculationController;
-  TextEditingController? _resultController;
   TextEditingController? _netAmountController;
   TextEditingController? _diffAmountController;
   TextEditingController? _ownAmountController;
@@ -81,24 +97,26 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
 
   onEdit() {
     _calculationController = TextEditingController();
-    _resultController = TextEditingController();
     _calculationController?.text = "";
-
     if (crrElecNum != "" &&
         crrWarNum != "" &&
         newElecNum != "" &&
         newWarNum != "") {
-      int electricityConsumed = int.parse(newElecNum) -
-          int.parse(crrElecNum);
-      int warterConsumed = int.parse(newWarNum) -
-          int.parse(crrWarNum);
       setState(() {
-        _calculationController?.text =
-            "Số điện đã sử dụng : $electricityConsumed \n"
-            "Số nước đã sử dụng : $warterConsumed \n";
-        _resultController?.text =
-            "Tiền điện là : ${electricityConsumed * 3500} \n"
-            "Tiền nước là : ${warterConsumed * 17000}";
+        totalAmount = helper.caculateCostOfElecAndWater(
+            crrElecNum,
+            crrWarNum,
+            newElecNum,
+            newWarNum,
+            electricityConsumed,
+            warterConsumed,
+            room!,
+            costList);
+      });
+    } else {
+      setState(() {
+        costList = [];
+        totalAmount = 0;
       });
     }
   }
@@ -166,9 +184,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       children: [
                         Expanded(
                           child: TextFormField(
-                            onEditingComplete: () {
-                              onEdit();
-                            },
+                              onEditingComplete: () {
+                                onEdit();
+                              },
                               onChanged: (value) {
                                 crrElecNum = value;
                               },
@@ -192,9 +210,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         ),
                         Expanded(
                           child: TextFormField(
-                            onEditingComplete: () {
-                              onEdit();
-                            },
+                              onEditingComplete: () {
+                                onEdit();
+                              },
                               onChanged: (value) {
                                 crrWarNum = value;
                               },
@@ -274,49 +292,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                             ]),
                       ),
                     ],
-                  ),
-                ),
-                Visibility(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: TextFormField(
-                              maxLines: null,
-                              controller: _calculationController,
-                              enabled: false,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ]),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        const Text(
-                          "=",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: TextFormField(
-                              maxLines: null,
-                              controller: _resultController,
-                              enabled: false,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ]),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 Padding(
@@ -399,6 +374,85 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
                         borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+                Visibility(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          const Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  "Loại tiền",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  "Số lượng",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  "Giá",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  "Tạm tính",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: costList.length,
+                            itemBuilder: (context, index) {
+                              return amountRow(costList[index][0],
+                                  costList[index][1], costList[index][2]);
+                            },
+                          ),
+                          const Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text(
+                                "Tổng tiền",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
+                                                 Text(
+                              "$totalAmount",
+                              style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                                                 ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -533,6 +587,55 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
               ],
             )),
       ),
+    );
+  }
+
+  Widget amountRow(String currency, int quantity, int amount) {
+    return Column(
+      children: [
+        const Divider(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Text(
+                currency,
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                '$quantity',
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                '$amount',
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                '${quantity * amount}',
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
