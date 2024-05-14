@@ -6,6 +6,7 @@ import 'package:room_manager/model/activity.dart';
 import 'package:room_manager/model/house.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
+import 'package:room_manager/screens/bill_page.dart';
 import 'package:room_manager/screens/home_page.dart';
 import 'package:room_manager/screens/invoice_create_page.dart';
 import 'package:room_manager/screens/invoice_page.dart';
@@ -33,10 +34,10 @@ void main() async {
 
 
   if (houseBox.isEmpty && roomBox.isEmpty) {
-    List<Invoice> invoice = [
-      Invoice(300, 123, DateTime.parse("2024-04-01"), DateTime.parse("2024-05-01"), 5500000),
-    ];
-    invoiceBox.addAll(invoice);
+    // List<Invoice> invoice = [
+    //   Invoice(300, 123, DateTime.parse("2024-05-01"), 5500000,5500000,5500000),
+    // ];
+    // invoiceBox.addAll(invoice);
 
     List<Room> newRooms = [
       Room(DateTime.now(), 301, "Nguyễn Vũ Hoàng Hóa"),
@@ -46,7 +47,7 @@ void main() async {
     roomBox.addAll(newRooms);
 
     var room = roomBox.values.first;
-    room.invoices.addAll(invoice);
+    // room.invoices.addAll(invoice);
     room.save();
 
     List<House> newHouses = [
@@ -88,7 +89,8 @@ class MyApp extends StatelessWidget {
         '/room-page': (context) => const RoomPage(),
         //Invoice routers
         '/invoice-page': (context) => const InvoiceManagement(),
-        '/invoice-page/Create': (context) => const InvoiceCreatePage(),
+        '/invoice-page/create': (context) => const InvoiceCreatePage(),
+        '/invoice-page/bill':(context) => BillPage(),
       },
     );
   }

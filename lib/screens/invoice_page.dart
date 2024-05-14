@@ -32,7 +32,7 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
     navigateToInvoiceCreatePage(Invoice invoice){
         Navigator.pushNamed(
           context,
-          '/invoice-page/Create',
+          '/invoice-page/create',
           arguments: invoice
         );
     }

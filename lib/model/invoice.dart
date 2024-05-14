@@ -21,35 +21,31 @@ class Invoice extends HiveObject {
   int? currentWaterNumber;
 
   @HiveField(4)
-  DateTime? fromDate;
+  DateTime? invoiceCreateDate;
 
   @HiveField(5)
-  DateTime? toDate;
+  int? amountAlreadyPay;
 
-  @HiveField(6)
-  double? amountAlreadyPay;
-
-  @HiveField(7)
-  double? amountOwed;
+ @HiveField(7)
+  int? surcharge;
 
   @HiveField(8)
+  int? amountOwed;
+
+  @HiveField(9)
   HiveList<Activity>? activities;
 
-  Invoice(this.newElectricityNumber, this.newWaterNumber, this.fromDate, this.toDate, this.amountAlreadyPay) {
+  Invoice(this.newElectricityNumber, this.newWaterNumber, this.invoiceCreateDate, this.amountOwed, this.amountAlreadyPay , this.surcharge) {
     activities = HiveList(roomActivitysBox);
   }
 
   // Constructor
   Invoice.createInvoice(Room room) {
     if (invoiceBox.isNotEmpty) {
-      var lastInvoice = roomBox.get(room)?.invoices.last;
-      if (lastInvoice != null) {
-        if (lastInvoice.currentElectricityNumber != null &&
-            lastInvoice.currentWaterNumber != null) {
-          currentElectricityNumber = lastInvoice.currentElectricityNumber;
-          currentWaterNumber = lastInvoice.currentWaterNumber;
-        }
-        amountAlreadyPay = lastInvoice.amountAlreadyPay;
+      if (room.currentElectricityNumber != 0 && room.currentWaterNumber != 0) { 
+          currentElectricityNumber = room.currentElectricityNumber;
+          currentWaterNumber = room.currentWaterNumber;
+          amountAlreadyPay = room.invoices.last.amountAlreadyPay;
       }
     }
     activities = HiveList(roomActivitysBox);

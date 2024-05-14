@@ -30,7 +30,7 @@ class InvoiceItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                invoice.fromDate.toString().split(" ")[0],
+                invoice.invoiceCreateDate.toString().split(" ")[0],
                 style: const TextStyle(
                   fontSize: 20,
                   color: tbBlack,

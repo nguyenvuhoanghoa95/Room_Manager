@@ -22,7 +22,7 @@ class InvoiceAppBar extends StatelessWidget implements PreferredSizeWidget {
     navigateToInvoiceCreatePage(Room? room){
         Navigator.pushNamed(
           context,
-          '/invoice-page/Create',
+          '/invoice-page/create',
           arguments: room
         );
     }

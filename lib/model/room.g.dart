@@ -21,15 +21,17 @@ class RoomAdapter extends TypeAdapter<Room> {
       fields[1] as int,
       fields[2] as String,
     )
-      ..totalAmountOwed = fields[3] == null ? 0.0 : fields[3] as double?
+      ..totalAmountOwed = fields[3] as int
       ..invoices = (fields[4] as HiveList).castHiveList()
-      ..status = fields[5] == null ? false : fields[5] as bool?;
+      ..status = fields[5] == null ? false : fields[5] as bool?
+      ..currentElectricityNumber = fields[6] as int
+      ..currentWaterNumber = fields[7] as int;
   }
 
   @override
   void write(BinaryWriter writer, Room obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.rentDueDate)
       ..writeByte(1)
@@ -41,7 +43,11 @@ class RoomAdapter extends TypeAdapter<Room> {
       ..writeByte(4)
       ..write(obj.invoices)
       ..writeByte(5)
-      ..write(obj.status);
+      ..write(obj.status)
+      ..writeByte(6)
+      ..write(obj.currentElectricityNumber)
+      ..writeByte(7)
+      ..write(obj.currentWaterNumber);
   }
 
   @override
