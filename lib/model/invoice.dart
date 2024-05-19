@@ -25,6 +25,7 @@ class Invoice extends HiveObject {
 
   @HiveField(5)
   int? amountAlreadyPay;
+  
 
  @HiveField(7)
   int? surcharge;
@@ -32,7 +33,11 @@ class Invoice extends HiveObject {
   @HiveField(8)
   int? amountOwed;
 
+  
   @HiveField(9)
+  int? totalAmount;
+
+  @HiveField(10)
   HiveList<Activity>? activities;
 
   Invoice(this.newElectricityNumber, this.newWaterNumber, this.invoiceCreateDate, this.amountOwed, this.amountAlreadyPay , this.surcharge) {
@@ -50,4 +55,5 @@ class Invoice extends HiveObject {
     }
     activities = HiveList(roomActivitysBox);
   }
+
 }

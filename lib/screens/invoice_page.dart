@@ -19,7 +19,6 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
   @override
   void initState() {
     super.initState();
-
     Future.delayed(Duration.zero, () {
       room = ModalRoute.of(context)!.settings.arguments as Room?;
       setState(() {

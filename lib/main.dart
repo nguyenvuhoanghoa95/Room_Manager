@@ -90,7 +90,7 @@ class MyApp extends StatelessWidget {
         //Invoice routers
         '/invoice-page': (context) => const InvoiceManagement(),
         '/invoice-page/create': (context) => const InvoiceCreatePage(),
-        '/invoice-page/bill':(context) => BillPage(),
+        '/invoice-page/bill':(context) => const BillPage(),
       },
     );
   }

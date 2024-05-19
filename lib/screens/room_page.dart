@@ -129,7 +129,7 @@ class _RoomPageState extends State<RoomPage> {
 
   //Navigate to invoicePage
   navigateToInvoicePage(Room room) {
-    Navigator.pushNamed(context, '/invoice-page/bill', arguments: room);
+    Navigator.pushNamed(context, '/invoice-page', arguments: room);
   }
 
   @override

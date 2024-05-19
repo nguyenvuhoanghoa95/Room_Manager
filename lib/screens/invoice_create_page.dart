@@ -4,6 +4,8 @@ import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/database/database_setting.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
+import 'package:room_manager/util/invoice_aguments.dart';
+import 'package:room_manager/util/invoice_helper.dart';
 import 'package:room_manager/widgets/appbar/invoice_appbar.dart';
 
 class InvoiceCreatePage extends StatefulWidget {
@@ -17,10 +19,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   Room? room;
   Invoice? invoice;
   final _formKey = GlobalKey<FormState>();  
-  // final NumberFormat _currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$'); // Currency formatter
 
-  //Helper
-  // var helper = InvoiceHelper();
+  // Helper
+  InvoiceHelper? helper;
 
   //Field data
   String currentPayment = '';
@@ -58,6 +59,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
           room = agument;
           invoice = Invoice.createInvoice(room!);
           _amoutController.text = '${invoice!.amountAlreadyPay ?? ""}';
+          helper = InvoiceHelper.createWithAgument(InvoiceAguments(
+            room!,invoice!
+          ));
         } else {
           invoice = agument as Invoice?;
         }
@@ -111,35 +115,22 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
         ? int.parse(_diffAmountController.text)
         : 0;
     invoice!.invoiceCreateDate = DateTime.parse(_dateController.text);
-
+    invoice!.totalAmount = helper?.caculateTotalAmount();
     //Create
     create();
   }
 
   create() {
-    // invoiceBox.add(invoice!);
-    // room!.invoices.add(invoice!);
-    // room!.save();
-    navigateToBillPage(room!);
+    invoiceBox.add(invoice!);
+    room!.invoices.add(invoice!);
+    room!.save();
+    navigateToBillPage();
   }
 
   //navigate to bill page
-  navigateToBillPage(Room room) async {
-    Navigator.pushNamed(context, '/invoice-page/bill', arguments: room);
+  navigateToBillPage() async {
+    Navigator.pushReplacementNamed(context, '/invoice-page/bill', arguments:InvoiceAguments(room!,invoice!));
   }
-
-  // addNote(BuildContext context) async {
-  //   _noteController = TextEditingController();
-
-  //   final result = await showDialog(
-  //       context: context, builder: (context) => NoteDialog(note: note));
-  //   if (result != null && result is String) {
-  //     setState(() {
-  //       note = result;
-  //       _noteController?.text = result;
-  //     });
-  //   }
-  // }
 
   // onEdit() {
   //   _calculationController = TextEditingController();
@@ -337,12 +328,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                               }
                               return null;
                             },
-                            // onChanged: (value) {
-                            //   newElecNum = value;
-                            // },
-                            // onEditingComplete: () {
-                            //   onEdit();
-                            // },
                             controller: _newElecNumController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
@@ -379,12 +364,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                               }
                               return null;
                             },
-                            // onChanged: (value) {
-                            //   newWarNum = value;
-                            // },
-                            // onEditingComplete: () {
-                            //   onEdit();
-                            // },
                             controller: _newWarNumController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
@@ -404,25 +383,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     ],
                   ),
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.all(8.0),
-                //   child: TextFormField(
-                //       controller: _netAmountController,
-                //       keyboardType: TextInputType.number,
-                //       decoration: InputDecoration(
-                //         labelText: 'Tiền mạng',
-                //         filled: true,
-                //         fillColor: Colors.white,
-                //         // hintText: 'x 3500/kWh',
-                //         border: OutlineInputBorder(
-                //           borderRadius: BorderRadius.circular(10.0),
-                //           borderSide: BorderSide.none,
-                //         ),
-                //       ),
-                //       inputFormatters: [
-                //         FilteringTextInputFormatter.digitsOnly
-                //       ]),
-                // ),
                 const SizedBox(
                   width: 10,
                 ),
@@ -483,8 +443,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                     controller: _noteController,
-                    // onTap: () => addNote(context),
-                    // readOnly: true,
                     maxLines: null,
                     decoration: InputDecoration(
                       labelText: 'Ghi chú...',
@@ -497,85 +455,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                     ),
                   ),
                 ),
-                // Visibility(
-                //   child: Padding(
-                //     padding: const EdgeInsets.all(8.0),
-                //     child: SingleChildScrollView(
-                //       child: Column(
-                //         children: [
-                //           const Row(
-                //             crossAxisAlignment: CrossAxisAlignment.center,
-                //             children: [
-                //               Expanded(
-                //                 flex: 3,
-                //                 child: Text(
-                //                   "Loại tiền",
-                //                   style: TextStyle(
-                //                       fontSize: 15,
-                //                       fontWeight: FontWeight.bold),
-                //                 ),
-                //               ),
-                //               Expanded(
-                //                 flex: 3,
-                //                 child: Text(
-                //                   "Số lượng",
-                //                   style: TextStyle(
-                //                       fontSize: 15,
-                //                       fontWeight: FontWeight.bold),
-                //                 ),
-                //               ),
-                //               Expanded(
-                //                 flex: 2,
-                //                 child: Text(
-                //                   "Giá",
-                //                   style: TextStyle(
-                //                       fontSize: 15,
-                //                       fontWeight: FontWeight.bold),
-                //                 ),
-                //               ),
-                //               Expanded(
-                //                 flex: 2,
-                //                 child: Text(
-                //                   "Tạm tính",
-                //                   style: TextStyle(
-                //                       fontSize: 15,
-                //                       fontWeight: FontWeight.bold),
-                //                 ),
-                //               ),
-                //             ],
-                //           ),
-                //           ListView.builder(
-                //             shrinkWrap: true,
-                //             physics: const NeverScrollableScrollPhysics(),
-                //             itemCount: costList.length,
-                //             itemBuilder: (context, index) {
-                //               return amountRow(costList[index][0],
-                //                   costList[index][1], costList[index][2]);
-                //             },
-                //           ),
-                //           const Divider(),
-                //           Row(
-                //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //             crossAxisAlignment: CrossAxisAlignment.end,
-                //             children: [
-                //               const Text(
-                //                 "Tổng tiền",
-                //                 style: TextStyle(
-                //                     fontSize: 15, fontWeight: FontWeight.bold),
-                //               ),
-                //                                  Text(
-                //               "$totalAmount",
-                //               style: const TextStyle(
-                //                   fontSize: 15,
-                //                   fontWeight: FontWeight.bold),
-                //                                  ),
-                //             ],
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
                 Visibility(
                   visible: room != null,
                   child: Padding(
@@ -687,7 +566,6 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        // const SizedBox(width: 10,),
                         ElevatedButton(
                           onPressed: () {},
                           style: ButtonStyle(
