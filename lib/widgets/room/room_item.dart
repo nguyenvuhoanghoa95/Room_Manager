@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/model/room.dart';
 
@@ -33,7 +34,7 @@ class RoomItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                room.roomNumber.toString(),
+                "Số phòng : ${room.roomNumber.toString()}",
                 style: const TextStyle(
                   fontSize: 20,
                   color: tbBlack,
@@ -42,6 +43,27 @@ class RoomItem extends StatelessWidget {
               ),
               Text(
                 "Người Thêu : ${room.roomRenterName}",
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: tbBlack,
+                ),
+              ),
+              Text(
+                "Ngày bắt đầu thêu : ${DateFormat("yyy-MM-dd").format(room.rentDueDate)}",
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: tbBlack,
+                ),
+              ),
+              Text(
+                "Ngày thanh toán : ${room.invoices.isNotEmpty ? DateFormat("yyy-MM-dd").format(room.invoices.last.invoiceCreateDate!) : "Chưa có hóa đơn nào"}",
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: tbBlack,
+                ),
+              ),
+               Text(
+                "Tình trạng : ${room.invoices.isNotEmpty && room.invoices.where((invoice) => invoice.debit != null).isNotEmpty ? "Có nợ" : "Không nợ"}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,

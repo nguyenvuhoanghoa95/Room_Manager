@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'dart:io';
 import 'package:dotted_line/dotted_line.dart';
@@ -215,11 +214,11 @@ class BillPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: captureAndShare,
                   style: ButtonStyle(
-                    backgroundColor: const MaterialStatePropertyAll<Color>(
+                    backgroundColor: const WidgetStatePropertyAll<Color>(
                         Color.fromARGB(255, 93, 185, 96)),
-                    minimumSize: MaterialStateProperty.all(const Size(600, 60)),
-                    elevation: MaterialStateProperty.all(0),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    minimumSize: WidgetStateProperty.all(const Size(600, 60)),
+                    elevation: WidgetStateProperty.all(0),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
@@ -242,7 +241,6 @@ class BillPage extends StatelessWidget {
   }
 
   Widget amountRow(int index, costList) {
-    // var subTitle = helper.getSubtitel(index);
     return Column(
       children: [
         const SizedBox(

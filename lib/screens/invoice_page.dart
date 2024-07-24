@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:room_manager/database/database_setting.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
 import 'package:room_manager/widgets/appbar/invoice_appbar.dart';
@@ -15,6 +16,7 @@ class InvoiceManagement extends StatefulWidget {
 class _InvoiceManagementState extends State<InvoiceManagement> {
   Room? room;
   List<Invoice>? invoices;
+  List<Invoice>? filteredItems = [];
 
   @override
   void initState() {
@@ -24,17 +26,22 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
       setState(() {
         invoices = room!.invoices.toList();
       });
+      filteredItems = invoices;
     });
   }
 
   //Navigate to invoicePage
-    navigateToInvoiceCreatePage(Invoice invoice){
-        Navigator.pushNamed(
-          context,
-          '/invoice-page/create',
-          arguments: invoice
-        );
-    }
+  navigateToInvoiceCreatePage(Invoice invoice) {
+    Navigator.pushNamed(context, '/invoice-page/create', arguments: invoice);
+  }
+
+  // Remove invoice
+  removeInvoice(int index) {
+    invoiceBox.deleteAt(index);
+    setState(() {
+      invoices = List<Invoice>.from(invoiceBox.values);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,23 +57,29 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               child: Column(
                 children: [
-                  // searchBox(),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: invoices?.length ?? 0,
+                      itemCount: filteredItems?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
                             child: InvoiceItem(
-                                invoice: invoices![index],
-                                navigateToInvoicePage: () => navigateToInvoiceCreatePage(invoices![index])));
+                              invoice: filteredItems![index],
+                              navigateToInvoicePage: () {
+                                navigateToInvoiceCreatePage(
+                                    filteredItems![index]);
+                              },
+                              removeFuntion: () {
+                                removeInvoice(index);
+                              },
+                            ));
                       },
                     ),
-                  )
+                  ),
                 ],
-              )),
+              ))
         ],
       ),
     );

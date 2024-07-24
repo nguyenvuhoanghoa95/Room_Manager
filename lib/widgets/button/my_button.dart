@@ -4,13 +4,27 @@ class MyButton extends StatelessWidget {
   final String text;
   final Color color;
   final VoidCallback onPressed;
-  const MyButton({super.key, required this.text, required this.color, required this.onPressed});
+  const MyButton(
+      {super.key,
+      required this.text,
+      required this.color,
+      required this.onPressed});
   @override
   Widget build(BuildContext context) {
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: onPressed,
-      color: color,
-      child: Text(text),  
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+        backgroundColor: WidgetStateProperty.all<Color>(color),
+        minimumSize: WidgetStateProperty.all(const Size(100, 50)),
+        elevation: WidgetStateProperty.all(0),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+      ),
+      child: Text(text),
     );
   }
 }

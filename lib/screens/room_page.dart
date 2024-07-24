@@ -17,16 +17,20 @@ class RoomPage extends StatefulWidget {
 class _RoomPageState extends State<RoomPage> {
   House? house;
   List<Room>? rooms;
+  List<Room>? filteredItems = [];
+
+  final _searchController = TextEditingController();
   final _electricityPriceController = TextEditingController();
   final _waterPriceController = TextEditingController();
   final _roomNameController = TextEditingController();
   final _datePickerController = TextEditingController();
   final _renterController = TextEditingController();
+  final _electricNumber = TextEditingController();
+  final _waterNumber = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
     Future.delayed(Duration.zero, () {
       house = ModalRoute.of(context)!.settings.arguments as House?;
       _electricityPriceController.text = "${house?.electricityPrice}";
@@ -34,6 +38,17 @@ class _RoomPageState extends State<RoomPage> {
       setState(() {
         rooms = house!.rooms.toList();
       });
+      filteredItems = rooms;
+    });
+    _searchController.addListener(_filterItems);
+  }
+
+  void _filterItems() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredItems = rooms
+          ?.where((room) => room.roomRenterName.toLowerCase().contains(query))
+          .toList();
     });
   }
 
@@ -51,7 +66,7 @@ class _RoomPageState extends State<RoomPage> {
       }
     }
     setState(() {
-      rooms = List<Room>.from(house!.rooms);
+      filteredItems = List<Room>.from(house!.rooms);
     });
     cancel();
   }
@@ -84,6 +99,8 @@ class _RoomPageState extends State<RoomPage> {
     editRoom.rentDueDate = DateTime.parse(_datePickerController.text);
     editRoom.roomRenterName = _renterController.text;
     editRoom.roomNumber = int.parse(_roomNameController.text);
+    if(int.parse(_electricNumber.text) != 0) editRoom.currentElectricityNumber = int.parse(_electricNumber.text);
+    if(int.parse(_waterNumber.text) != 0)  editRoom.currentWaterNumber = int.parse(_waterNumber.text);
     return editRoom.save();
   }
 
@@ -96,12 +113,15 @@ class _RoomPageState extends State<RoomPage> {
         _renterController.text = room.roomRenterName;
         _datePickerController.text = room.rentDueDate.toString().split(" ")[0];
         _roomNameController.text = "${room.roomNumber}";
-
+        _electricNumber.text = "${room.currentElectricityNumber}";
+        _waterNumber.text = "${room.currentWaterNumber}";
         //Open dialog
         return RoomDialog(
           renterController: _renterController,
           roomNameController: _roomNameController,
           datePickerController: _datePickerController,
+          electricNumber: _electricNumber,
+          waterNumber: _waterNumber,
           edit: () => saveRoom(index: index),
           cancel: () => cancel(),
         );
@@ -119,10 +139,10 @@ class _RoomPageState extends State<RoomPage> {
 
   // Remove room
   removeRoom(int index) {
-    roomBox.deleteAt(index);
+    roomBox.delete(index);
     if (rooms != null) {
       setState(() {
-        rooms = List<Room>.from(roomBox.values);
+        filteredItems = List<Room>.from(roomBox.values);
       });
     }
   }
@@ -150,18 +170,19 @@ class _RoomPageState extends State<RoomPage> {
                   searchBox(),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: rooms?.length ?? 0,
+                      itemCount: filteredItems?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
                             child: RoomItem(
-                                room: rooms![index],
+                                room: filteredItems![index],
                                 navigateToInvoicePage: () =>
-                                    navigateToInvoicePage(rooms![index]),
+                                    navigateToInvoicePage(
+                                        filteredItems![index]),
                                 editFuntion: () =>
-                                    editDialog(rooms![index], index),
+                                    editDialog(filteredItems![index], index),
                                 removeFuntion: () => removeRoom(index)));
                       },
                     ),
@@ -205,8 +226,9 @@ class _RoomPageState extends State<RoomPage> {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child: const TextField(
-        decoration: InputDecoration(
+      child: TextField(
+        controller: _searchController,
+        decoration: const InputDecoration(
           contentPadding: EdgeInsets.all(0),
           prefixIcon: Icon(
             Icons.search,

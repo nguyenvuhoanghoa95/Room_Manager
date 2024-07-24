@@ -1,5 +1,4 @@
 import 'package:room_manager/constants/const.dart';
-import 'package:room_manager/database/database_setting.dart';
 import 'package:room_manager/model/house.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
@@ -12,14 +11,6 @@ class InvoiceHelper {
   InvoiceAguments? invoiceAguments;
   List costList = [];
 
-  // List costList = [
-//     // ["Tiền Phòng", 1, 5500000],
-//     // ["Tiền Điện", 50, 3500],
-//     // ["Tiền Nước", 20, 17000],
-//     // ["Tiền Khác", 20, 17000],
-//     // ["Tiền Nợ", 20, 1000000]
-//   ];
-
   InvoiceHelper();
 
   InvoiceHelper.createWithAgument(this.invoiceAguments) {
@@ -27,7 +18,7 @@ class InvoiceHelper {
     invoice = invoiceAguments?.invoice;
   }
 
-  caculateTotalAmount() {
+  caculateTotalAmount([currrentPayment]) {
     var arr = room?.getElecAndWatPrice();
     num totalAmount = 0;
     var electricityConsumed =
@@ -40,8 +31,11 @@ class InvoiceHelper {
     if (invoice?.surcharge != null) {
       totalAmount += invoice?.surcharge as num;
     }
-    if (invoice?.amountOwed != null) {
-      totalAmount += invoice?.amountOwed as num;
+    if(invoice!.debit!.isEmpty) return totalAmount;  
+    if(invoice?.debit != null && currrentPayment.isEmpty){
+      totalAmount -= invoice!.debit![0].amount as num;
+    }else{
+      totalAmount += invoice!.debit![0].amount as num;
     }
     return totalAmount;
   }
@@ -80,12 +74,12 @@ class InvoiceHelper {
         invoice?.surcharge
       ]);
     }
-    if (invoice?.amountOwed != null) {
+    if (invoice!.debit!.isNotEmpty && invoice?.debit != null && invoice?.debit![0].amount != 0) {
       costList.add([
         "Tiền Nợ",
-        "Tiền còn nợ lại: ${numberFormat.format(invoice?.amountOwed)}",
+        "Tiền còn nợ lại: ${numberFormat.format(invoice?.debit?[0].amount)}",
         1,
-        invoice?.amountOwed
+        invoice?.debit?[0].amount
       ]);
     }
 

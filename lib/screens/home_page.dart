@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _searchController = TextEditingController();
   final _addressController = TextEditingController();
   final _nameOwnerController = TextEditingController();
   final _availableRoomsController = TextEditingController();
@@ -21,6 +22,22 @@ class _HomePageState extends State<HomePage> {
   final _waterPriceController = TextEditingController();
 
   List<House>? houses = houseBox.values.toList();
+
+  List<House>? filteredItems  = [];
+
+   @override
+  void initState() {
+    super.initState();
+    filteredItems = houses;
+    _searchController.addListener(_filterItems);
+  }
+
+ void _filterItems() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredItems = houses?.where((house) => house.nameOwner.toLowerCase().contains(query)).toList();
+    });
+  }
 
   //save 
   saveHouse({int? index}) {
@@ -38,7 +55,7 @@ class _HomePageState extends State<HomePage> {
         }
     }
     setState(() {
-      houses = List<House>.from(houseBox.values);
+      filteredItems = List<House>.from(houseBox.values);
     });
     cancel();
   }
@@ -120,7 +137,7 @@ class _HomePageState extends State<HomePage> {
   removeHouse(int index) {
     houseBox.deleteAt(index);
     setState(() {
-      houses = List<House>.from(houseBox.values);
+      filteredItems = List<House>.from(houseBox.values);
     });
   }
 
@@ -143,22 +160,22 @@ class _HomePageState extends State<HomePage> {
                   searchBox(),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: houses?.length ?? 0,
+                      itemCount: filteredItems?.length ?? 0,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                             margin: const EdgeInsets.only(
                               top: 25,
                             ),
                             child: HouseItem(
-                              house: houses![index],
+                              house: filteredItems![index],
                               removeHouseFuntion: () {
                                 removeHouse(index);
                               },
                               editHouseFuntion: () {
-                                editDialog(houses![index], index);
+                                editDialog(filteredItems![index], index);
                               },
                               navigateToRoomPage: () {
-                                navigateToRoomPage(context, houses![index]);
+                                navigateToRoomPage(context, filteredItems![index]);
                               },
                             ));
                       },
@@ -203,8 +220,9 @@ class _HomePageState extends State<HomePage> {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child: const TextField(
-        decoration: InputDecoration(
+      child:  TextField(
+        controller: _searchController,
+        decoration: const InputDecoration(
           contentPadding: EdgeInsets.all(0),
           prefixIcon: Icon(
             Icons.search,

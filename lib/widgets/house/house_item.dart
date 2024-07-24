@@ -35,7 +35,7 @@ class HouseItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                house.nameOwner,
+                "Chủ nhà : ${house.nameOwner}",
                 style: const TextStyle(
                   fontSize: 20,
                   color: tbBlack,
@@ -43,14 +43,14 @@ class HouseItem extends StatelessWidget {
                 ),
               ),
               Text(
-                "Room Available : ${house.availableRooms}",
+                "Số phòng đã cho thêu : ${house.rooms.length}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,
                 ),
               ),
               Text(
-                house.address,
+                "Địa chỉ : ${house.address}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,

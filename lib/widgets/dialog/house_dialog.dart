@@ -53,7 +53,7 @@ class HouseDialog extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Địa chỉ',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Colors.white,
                   hintText: 'VD: 123 Nguyễn Tri Phương....',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -69,7 +69,7 @@ class HouseDialog extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Người thêu',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Colors.white,
                   hintText: 'VD: Nguyễn Văn A,B',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -85,7 +85,7 @@ class HouseDialog extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Số lượng phòng',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide.none,
@@ -102,7 +102,7 @@ class HouseDialog extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Giá điện',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Colors.white,
                   hintText: 'Mặc định : 3500đ',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -120,7 +120,7 @@ class HouseDialog extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Giá nước',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Colors.white,
                   hintText: 'Mặc định: 17000',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -132,22 +132,25 @@ class HouseDialog extends StatelessWidget {
               ),
             ),
             //button --> save and close
-            Row(
-              children: [
-                // save button
-                Expanded(
-                    child: MyButton(
-                        text: "Lưu",
-                        color: tbBlue,
-                        onPressed: () => create != null ? create!() : edit!())),
-                const SizedBox(
-                  width: 40,
-                ),
-                // close button
-                Expanded(
-                    child:
-                        MyButton(text: "Hủy", color: tdRed, onPressed: cancel)),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  // save button
+                  Expanded(
+                      child: MyButton(
+                          text: "Lưu",
+                          color: Colors.green,
+                          onPressed: () => create != null ? create!() : edit!())),
+                  const SizedBox(
+                    width: 40,
+                  ),
+                  // close button
+                  Expanded(
+                      child:
+                          MyButton(text: "Hủy", color: Colors.green, onPressed: cancel)),
+                ],
+              ),
             )
           ],
         ),

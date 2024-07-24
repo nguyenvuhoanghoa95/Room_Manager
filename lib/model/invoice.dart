@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:room_manager/model/activity.dart';
+import 'package:room_manager/model/debit.dart';
 import 'package:room_manager/model/room.dart';
 
 import '../database/database_setting.dart';
@@ -25,24 +25,20 @@ class Invoice extends HiveObject {
 
   @HiveField(5)
   int? amountAlreadyPay;
-  
 
- @HiveField(7)
+  @HiveField(6)
+  String? note;
+  
+  @HiveField(7)
   int? surcharge;
 
   @HiveField(8)
-  int? amountOwed;
+  HiveList<Debit>? debit;
 
-  
   @HiveField(9)
   int? totalAmount;
 
-  @HiveField(10)
-  HiveList<Activity>? activities;
-
-  Invoice(this.newElectricityNumber, this.newWaterNumber, this.invoiceCreateDate, this.amountOwed, this.amountAlreadyPay , this.surcharge) {
-    activities = HiveList(roomActivitysBox);
-  }
+  Invoice(this.newElectricityNumber, this.newWaterNumber, this.invoiceCreateDate, this.amountAlreadyPay , this.surcharge);
 
   // Constructor
   Invoice.createInvoice(Room room) {
@@ -53,7 +49,6 @@ class Invoice extends HiveObject {
           amountAlreadyPay = room.invoices.last.amountAlreadyPay;
       }
     }
-    activities = HiveList(roomActivitysBox);
+    debit = HiveList(debitBox);
   }
-
 }

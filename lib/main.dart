@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:room_manager/database/database_setting.dart';
-import 'package:room_manager/model/activity.dart';
+import 'package:room_manager/model/debit.dart';
 import 'package:room_manager/model/house.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
@@ -16,23 +16,19 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(HouseAdapter());
   Hive.registerAdapter(RoomAdapter());
-  Hive.registerAdapter(ActivityAdapter());
   Hive.registerAdapter(InvoiceAdapter());
+  Hive.registerAdapter(DebitAdapter());
 
 
 
   if (!Hive.isBoxOpen(houseTableName)) {
-    roomActivitysBox = await Hive.openBox<Activity>(roomActivitysTableName);
+    debitBox = await Hive.openBox<Debit>(debitTableName);
     invoiceBox = await Hive.openBox<Invoice>(invoiceTableName);
     roomBox = await Hive.openBox<Room>(roomTableName);
     houseBox = await Hive.openBox<House>(houseTableName);
   }
 
   
-  // houseBox.clear();
-  // roomBox.clear();
-
-
   if (houseBox.isEmpty && roomBox.isEmpty) {
     // List<Invoice> invoice = [
     //   Invoice(300, 123, DateTime.parse("2024-05-01"), 5500000,5500000,5500000),
@@ -77,7 +73,7 @@ class MyApp extends StatelessWidget {
         const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Room Manager App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 67, 41, 114)),
         useMaterial3: true,

@@ -20,14 +20,14 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       fields[0] as int?,
       fields[1] as int?,
       fields[4] as DateTime?,
-      fields[8] as int?,
       fields[5] as int?,
       fields[7] as int?,
     )
       ..currentElectricityNumber = fields[2] as int?
       ..currentWaterNumber = fields[3] as int?
-      ..totalAmount = fields[9] as int?
-      ..activities = (fields[10] as HiveList?)?.castHiveList();
+      ..note = fields[6] as String?
+      ..debit = (fields[8] as HiveList?)?.castHiveList()
+      ..totalAmount = fields[9] as int?;
   }
 
   @override
@@ -46,14 +46,14 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       ..write(obj.invoiceCreateDate)
       ..writeByte(5)
       ..write(obj.amountAlreadyPay)
+      ..writeByte(6)
+      ..write(obj.note)
       ..writeByte(7)
       ..write(obj.surcharge)
       ..writeByte(8)
-      ..write(obj.amountOwed)
+      ..write(obj.debit)
       ..writeByte(9)
-      ..write(obj.totalAmount)
-      ..writeByte(10)
-      ..write(obj.activities);
+      ..write(obj.totalAmount);
   }
 
   @override

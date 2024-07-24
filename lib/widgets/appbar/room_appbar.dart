@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
-import 'package:room_manager/database/database_setting.dart';
 import 'package:room_manager/model/house.dart';
 import 'package:room_manager/widgets/dialog/elec_and_water_dialog.dart';
 
@@ -68,7 +67,6 @@ class RoomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           onTap: () => openDialog(context),
                           child: const Text('Sửa giá điện nước'),
                         ),
-                      
                       ],
                     ),
       ],

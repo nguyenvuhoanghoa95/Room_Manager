@@ -17,8 +17,8 @@ class ElecAndWaterDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: tbBGColor,
       content: SizedBox(
-        height: 400,
-        width: 500,
+        height: 350,
+        width: 400,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +37,7 @@ class ElecAndWaterDialog extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'Đơn Giá Điện',
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.white,
                 hintText: 'VD: 3500',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
@@ -52,7 +52,7 @@ class ElecAndWaterDialog extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'Đơn Giá Nước',
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.white,
                 hintText: 'VD: 17000',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
@@ -68,14 +68,14 @@ class ElecAndWaterDialog extends StatelessWidget {
                 // save button
                 Expanded(
                     child: MyButton(
-                        text: "Lưu", color: Colors.purple,onPressed: () => edit!())),
+                        text: "Lưu", color: Colors.green,onPressed: () => edit!())),
                 const SizedBox(
                   width: 40,
                 ),
                 // close button
                 Expanded(
                     child: MyButton(
-                        text: "Hủy", color: Colors.purple,onPressed: () => cancel!())),
+                        text: "Hủy", color: Colors.green,onPressed: () => cancel!())),
               ],
             )
           ],
