@@ -53,7 +53,7 @@ class BillPage extends StatelessWidget {
 
         // Share the image
         final result =
-            await Share.shareXFiles([xFile], text: 'Check out my screenshot!');
+            await Share.shareXFiles([xFile], text: '');
         if (result.status == ShareResultStatus.success) {
           navigatorToInvoicePage();
         }

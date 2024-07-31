@@ -107,7 +107,7 @@ class _RoomDialog extends State<RoomDialog> {
               child: TextField(
                 controller: _dateController,
                 decoration: InputDecoration(
-                    labelText: 'Ngày thu tiền',
+                    labelText: 'Ngày thuê',
                     filled: true,
                     fillColor: Colors.white,
                     prefixIcon: const Icon(Icons.calendar_today),
@@ -129,7 +129,7 @@ class _RoomDialog extends State<RoomDialog> {
               child: TextField(
                 controller: _renterController,
                 decoration: InputDecoration(
-                  labelText: 'Tên người thêu',
+                  labelText: 'Tên người thuê',
                   filled: true,
                   fillColor: Colors.white,
                   hintText: 'VD: Nguyễn Văn A',

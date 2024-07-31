@@ -43,7 +43,7 @@ class HouseItem extends StatelessWidget {
                 ),
               ),
               Text(
-                "Số phòng đã cho thêu : ${house.rooms.length}",
+                "Số phòng đã cho thuê : ${house.rooms.length}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,

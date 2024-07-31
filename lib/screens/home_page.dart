@@ -23,36 +23,38 @@ class _HomePageState extends State<HomePage> {
 
   List<House>? houses = houseBox.values.toList();
 
-  List<House>? filteredItems  = [];
+  List<House>? filteredItems = [];
 
-   @override
+  @override
   void initState() {
     super.initState();
     filteredItems = houses;
     _searchController.addListener(_filterItems);
   }
 
- void _filterItems() {
+  void _filterItems() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      filteredItems = houses?.where((house) => house.nameOwner.toLowerCase().contains(query)).toList();
+      filteredItems = houses
+          ?.where((house) => house.nameOwner.toLowerCase().contains(query))
+          .toList();
     });
   }
 
-  //save 
+  //save
   saveHouse({int? index}) {
     if (_addressController.text.isNotEmpty &&
         _nameOwnerController.text.isNotEmpty &&
         _availableRoomsController.text.isNotEmpty &&
         _electricityPriceController.text.isNotEmpty &&
         _waterPriceController.text.isNotEmpty) {
-        if (index == null) {
-          //Add action
-          addHouse();
-        } else {
-          //Edit action
-          editHouse(houses![index]);
-        }
+      if (index == null) {
+        //Add action
+        addHouse();
+      } else {
+        //Edit action
+        editHouse(houses![index]);
+      }
     }
     setState(() {
       filteredItems = List<House>.from(houseBox.values);
@@ -79,12 +81,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   addHouse() {
-    houseBox.add(House(
+    var newHouse = House(
         _addressController.text,
         _nameOwnerController.text,
         int.parse(_availableRoomsController.text),
         int.parse(_electricityPriceController.text),
-        int.parse(_waterPriceController.text)));
+        int.parse(_waterPriceController.text),
+        true);
+
+    houseBox.add(newHouse);
+    //houses![houseBox.length].save();
   }
 
   //Call edit house dialog
@@ -175,7 +181,8 @@ class _HomePageState extends State<HomePage> {
                                 editDialog(filteredItems![index], index);
                               },
                               navigateToRoomPage: () {
-                                navigateToRoomPage(context, filteredItems![index]);
+                                navigateToRoomPage(
+                                    context, filteredItems![index]);
                               },
                             ));
                       },
@@ -220,7 +227,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child:  TextField(
+      child: TextField(
         controller: _searchController,
         decoration: const InputDecoration(
           contentPadding: EdgeInsets.all(0),

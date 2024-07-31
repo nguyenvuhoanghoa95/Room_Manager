@@ -34,9 +34,13 @@ class Room extends HiveObject {
   Room(this.rentDueDate, this.roomNumber, this.roomRenterName){
     invoices = HiveList(invoiceBox);
   }
-  
+
+  getHouse() {
+    return houseBox.values.where((house) => house.rooms.contains(this)).first;
+  }
+
   getElecAndWatPrice(){
-   var house = houseBox.values.where((house) => house.rooms.indexOf(this) == 0).first;
+   var house = getHouse();
    return [house.electricityPrice,house.waterPrice];
   }
   

@@ -42,14 +42,14 @@ class RoomItem extends StatelessWidget {
                 ),
               ),
               Text(
-                "Người Thêu : ${room.roomRenterName}",
+                "Người Thuê : ${room.roomRenterName}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,
                 ),
               ),
               Text(
-                "Ngày bắt đầu thêu : ${DateFormat("yyy-MM-dd").format(room.rentDueDate)}",
+                "Ngày bắt đầu thuê : ${DateFormat("yyy-MM-dd").format(room.rentDueDate)}",
                 style: const TextStyle(
                   fontSize: 15,
                   color: tbBlack,

@@ -52,17 +52,20 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   final _ownAmountController = TextEditingController();
   final _noteController = TextEditingController();
   final _newWarNumController = TextEditingController();
+  final _newWifiController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () {
       setState(() {
-        var agument = ModalRoute.of(context)!.settings.arguments;
-        if (agument is Room) {
+        var argument = ModalRoute.of(context)!.settings.arguments;
+        if (argument is Room) {
           edit = false;
-          room = agument;
+          room = argument;
           invoice = Invoice.createInvoice(room!);
+          _dateController.text = invoice!.invoiceCreateDate.toString().split(" ")[0];
+          _newWifiController.text = invoice!.wifiAmount.toString();
           if (invoice!.amountAlreadyPay != null) {
             _amoutController.text =
                 moneyFormat.format(invoice!.amountAlreadyPay);
@@ -71,12 +74,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
               InvoiceHelper.createWithAgument(InvoiceAguments(room!, invoice!));
         } else {
           edit = true;
-          invoice = agument as Invoice?;
-          room = roomBox.values.firstWhere((room) => room.invoices
-              .firstWhere((roomInvoice) => roomInvoice == invoice)
-              .isInBox);
-          helper =
-              InvoiceHelper.createWithAgument(InvoiceAguments(room!, invoice!));
+          invoice = argument as Invoice?;
+          room = roomBox.values.where((room) => room.invoices.contains(invoice)).first;
+          helper = InvoiceHelper.createWithAgument(InvoiceAguments(room!, invoice!));
           setInvoiceValue(invoice!);
         }
       });
@@ -102,6 +102,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
     _ownAmountController.dispose();
     _noteController.dispose();
     _newWarNumController.dispose();
+    _newWifiController.dispose();
     super.dispose();
   }
 
@@ -128,6 +129,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
     invoice!.newElectricityNumber = int.parse(_newElecNumController.text);
 
     invoice!.newWaterNumber = int.parse(_newWarNumController.text);
+    invoice!.wifiAmount = int.parse(_newWifiController.text.replaceAll(",", ""));
     if (!edit!) {
       room!.currentWaterNumber = int.parse(_newWarNumController.text);
       room!.currentElectricityNumber = int.parse(_newElecNumController.text);
@@ -177,6 +179,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
         : "0";
     _noteController.text = invoice.note!;
     _newWarNumController.text = invoice.newWaterNumber.toString();
+    _newWifiController.text = invoice.wifiAmount.toString();
     totalAmount = invoice.totalAmount!;
   }
 
@@ -201,393 +204,385 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   Widget build(BuildContext context) {
     return edit != null
         ? Scaffold(
-            appBar: InvoiceAppBar(
-              title: !edit! ? "Thêm hóa đơn" : "Sửa hóa đơn",
-            ),
-            backgroundColor: tbBGColor,
-            body: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    shrinkWrap: true,
+      appBar: InvoiceAppBar(
+        title: !edit! ? "Thêm hóa đơn" : "Sửa hóa đơn",
+      ),
+      backgroundColor: tbBGColor,
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+            key: _formKey,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        //return 'Vui lòng nhập thông tin';
+                        // value = DateTime.now();
+                      }
+                      return null;
+                    },
+                    controller: _dateController,
+                    decoration: InputDecoration(
+                        labelText: 'Ngày tạo hoá đơn',
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.calendar_today),
+                        hintText: 'VD: 03/12/2023',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue))),
+                    readOnly: true,
+                    //_dateController = DateTime.now();
+                    onTap: () {
+                      selectDate();
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vui lòng nhập tiền phòng';
+                      }
+                      return null;
+                    },
+                    controller: _amoutController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Tiền phòng',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    inputFormatters: [
+                      ThousandsFormatter(),
+                    ],
+                  ),
+                ),
+                Visibility(
+                  visible: invoice?.currentElectricityNumber == null &&
+                      invoice?.currentWaterNumber == null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Vui lòng nhập thông tin';
+                                }
+                                return null;
+                              },
+                              controller: _crrElecNumController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: 'Số điện hiện tại',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(10.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                              controller: _crrWarNumController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: 'Số nước hiện tại',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(10.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Vui lòng nhập thông tin';
-                            }
-                            return null;
-                          },
-                          controller: _dateController,
-                          decoration: InputDecoration(
-                              labelText: 'Ngày tạo hoá đơn',
-                              filled: true,
-                              fillColor: Colors.white,
-                              prefixIcon: const Icon(Icons.calendar_today),
-                              hintText: 'VD: 03/12/2023',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.blue))),
-                          readOnly: true,
-                          onTap: () {
-                            selectDate();
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Vui lòng nhập tiền phòng';
-                            }
-                            return null;
-                          },
-                          controller: _amoutController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Tiền phòng',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          inputFormatters: [
-                            ThousandsFormatter(),
-                          ],
-                        ),
-                      ),
-                      Visibility(
-                        visible: invoice?.currentElectricityNumber == null &&
-                            invoice?.currentWaterNumber == null,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Vui lòng nhập thông tin';
-                                      }
-                                      return null;
-                                    },
-                                    controller: _crrElecNumController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      labelText: 'Số điện hiện tại',
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ]),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Vui lòng nhập thông tin';
-                                      }
-                                      return null;
-                                    },
-                                    controller: _crrWarNumController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      labelText: 'Số nước hiện tại',
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                  validator: (value) {
-                                    if (edit!) {
-                                      return null;
-                                    } else if (value == null || value.isEmpty) {
-                                      return 'Vui lòng nhập thông tin';
-                                    } else if (room!.currentElectricityNumber !=
-                                            0 &&
-                                        room!.currentElectricityNumber -
-                                                int.parse(value) >
-                                            0) {
-                                      return "Số điện cũ : ${room!.currentElectricityNumber == 0 ? "" : room!.currentElectricityNumber}\nvui lòng nhập lại";
-                                    } else if (room!.currentElectricityNumber !=
-                                            0 &&
-                                        room!.currentElectricityNumber -
-                                                int.parse(value) >
-                                            0) {
-                                      return "Số điện thấp hơn số cũ \nvui lòng nhập lại";
-                                    }
-                                    return null;
-                                  },
-                                  controller: _newElecNumController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: 'Số điện mới',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    hintText: !edit!
-                                        ? 'Cũ : ${room?.currentElectricityNumber}'
-                                        : "",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ]),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: TextFormField(
-                                  validator: (value) {
-                                    if (edit!) {
-                                      return null;
-                                    } else if (value == null || value.isEmpty) {
-                                      return 'Vui lòng nhập thông tin';
-                                    } else if (room!.currentWaterNumber != 0 &&
-                                        room!.currentWaterNumber -
-                                                int.parse(value) >
-                                            0) {
-                                      return "Số nước cũ : ${room!.currentWaterNumber == 0 ? "" : room!.currentWaterNumber}\nvui lòng nhập lại";
-                                    } else if (room!.currentWaterNumber != 0 &&
-                                        room!.currentWaterNumber -
-                                                int.parse(value) >
-                                            0) {
-                                      return "Số nước thấp hơn số cũ \nvui lòng nhập lại";
-                                    }
-                                    return null;
-                                  },
-                                  controller: _newWarNumController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: 'Số nước mới',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    hintText: !edit!
-                                        ? 'Cũ : ${room?.currentWaterNumber}'
-                                        : "",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ]),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      Expanded(
                         child: TextFormField(
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
+                              if (edit!) {
+                                return null;
+                              } else if (value == null || value.isEmpty) {
                                 return 'Vui lòng nhập thông tin';
+                              } else if (room!.currentElectricityNumber !=
+                                  0 &&
+                                  room!.currentElectricityNumber -
+                                      int.parse(value) >
+                                      0) {
+                                return "Số điện cũ : ${room!.currentElectricityNumber == 0 ? "" : room!.currentElectricityNumber}\nvui lòng nhập lại";
+                              } else if (room!.currentElectricityNumber !=
+                                  0 &&
+                                  room!.currentElectricityNumber -
+                                      int.parse(value) >
+                                      0) {
+                                return "Số điện thấp hơn số cũ \nvui lòng nhập lại";
                               }
                               return null;
                             },
-                            controller: _diffAmountController,
+                            controller: _newElecNumController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              labelText: 'Thu khác',
+                              labelText: 'Số điện mới',
                               filled: true,
                               fillColor: Colors.white,
+                              hintText: !edit!
+                                  ? 'Cũ : ${room?.currentElectricityNumber}'
+                                  : "",
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                                 borderSide: BorderSide.none,
                               ),
                             ),
                             inputFormatters: [
-                              ThousandsFormatter(),
+                              FilteringTextInputFormatter.digitsOnly
                             ]),
                       ),
-                      Visibility(
-                        visible: !edit!,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                              controller: _ownAmountController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Tiền nợ',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              inputFormatters: [
-                                ThousandsFormatter(),
-                              ]),
-                        ),
+                      const SizedBox(
+                        width: 10,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      Expanded(
                         child: TextFormField(
-                          controller: _noteController,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            labelText: 'Ghi chú...',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      Visibility(
-                        visible: edit!,
-                        child: Row(
-                          children: [
-                            Radio(
-                              value: 'final-pay',
-                              groupValue: currentPayment,
-                              onChanged: (value) {
-                                setState(() {
-                                  currentPayment = value!;
-                                });
-                              },
-                            ),
-                            const Text('Thanh toán đủ'),
-                            Radio(
-                              value: 'partial-pay',
-                              groupValue: currentPayment,
-                              onChanged: (value) {
-                                if (int.parse(_ownAmountController.text
-                                        .replaceAll(",", "")) !=
-                                    0) {
-                                  setState(() {
-                                    currentPayment = value!;
-                                  });
-                                } else {
-                                  return;
-                                }
-                              },
-                            ),
-                            const Text('Thanh toán thiếu'),
-                          ],
-                        ),
-                      ),
-                      Visibility(
-                        visible: edit!,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                              validator: (value) {
-                                if (edit! &&
-                                    (invoice!.debit![0].amount! <
-                                        int.parse(
-                                            value!.replaceAll(",", "")))) {
-                                  return "Số tiền phải thanh toán lớn hơn số nợ";
-                                }
-                                return null;
-                              },
-                              enabled: currentPayment.isNotEmpty &&
-                                  currentPayment != 'final-pay',
-                              onEditingComplete: onEdit,
-                              controller: _ownAmountController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Số tiền nợ',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              inputFormatters: [
-                                ThousandsFormatter(),
-                              ]),
-                        ),
-                      ),
-                      Visibility(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                saveInvoice();
-                                // If the form is valid, display a snackbar. In the real world,
-                                // ScaffoldMessenger.of(context).showSnackBar(
-                                //   const SnackBar(content: Text('Processing Data')),
-                                // );
-                              }
-                            },
-                            style: ButtonStyle(
-                              foregroundColor:
-                                  WidgetStateProperty.all<Color>(Colors.white),
-                              backgroundColor:
-                                  WidgetStateProperty.all<Color>(Colors.green),
-                              minimumSize:
-                                  WidgetStateProperty.all(const Size(150, 60)),
-                              elevation: WidgetStateProperty.all(0),
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
+                            controller: _newWarNumController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Số nước mới',
+                              filled: true,
+                              fillColor: Colors.white,
+                              hintText: !edit!
+                                  ? 'Cũ : ${room?.currentWaterNumber}'
+                                  : "",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: BorderSide.none,
                               ),
                             ),
-                            child: const Text(
-                              "Tính Tiền",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ]),
                       ),
                     ],
-                  )),
-            ),
-          )
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                      controller: _newWifiController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Wifi',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      inputFormatters: [
+                        ThousandsFormatter(),
+                      ]),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                      controller: _diffAmountController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Thu khác',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      inputFormatters: [
+                        ThousandsFormatter(),
+                      ]),
+                ),
+
+                Visibility(
+                  visible: !edit!,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                        controller: _ownAmountController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Tiền nợ',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        inputFormatters: [
+                          ThousandsFormatter(),
+                        ]),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    controller: _noteController,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      labelText: 'Ghi chú...',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+
+                Visibility(
+                  visible: edit!,
+                  child: Row(
+                    children: [
+                      Radio(
+                        value: 'final-pay',
+                        groupValue: currentPayment,
+                        onChanged: (value) {
+                          setState(() {
+                            currentPayment = value!;
+                          });
+                        },
+                      ),
+                      const Text('Thanh toán đủ'),
+                      Radio(
+                        value: 'partial-pay',
+                        groupValue: currentPayment,
+                        onChanged: (value) {
+                          if (int.parse(_ownAmountController.text
+                              .replaceAll(",", "")) !=
+                              0) {
+                            setState(() {
+                              currentPayment = value!;
+                            });
+                          } else {
+                            return;
+                          }
+                        },
+                      ),
+                      const Text('Thanh toán thiếu'),
+                    ],
+                  ),
+                ),
+                Visibility(
+                  visible: edit!,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                        validator: (value) {
+                          if (edit! &&
+                              (invoice!.debit![0].amount! <
+                                  int.parse(
+                                      value!.replaceAll(",", "")))) {
+                            return "Số tiền phải thanh toán lớn hơn số nợ";
+                          }
+                          return null;
+                        },
+                        enabled: currentPayment.isNotEmpty &&
+                            currentPayment != 'final-pay',
+                        onEditingComplete: onEdit,
+                        controller: _ownAmountController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Số tiền nợ',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        inputFormatters: [
+                          ThousandsFormatter(),
+                        ]),
+                  ),
+                ),
+                Visibility(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          saveInvoice();
+                          // If the form is valid, display a snackbar. In the real world,
+                          // ScaffoldMessenger.of(context).showSnackBar(
+                          //   const SnackBar(content: Text('Processing Data')),
+                          // );
+                        }
+                      },
+                      style: ButtonStyle(
+                        foregroundColor:
+                        WidgetStateProperty.all<Color>(Colors.white),
+                        backgroundColor:
+                        WidgetStateProperty.all<Color>(Colors.green),
+                        minimumSize:
+                        WidgetStateProperty.all(const Size(150, 60)),
+                        elevation: WidgetStateProperty.all(0),
+                        shape: WidgetStateProperty.all<
+                            RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        "Tính Tiền",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+      ),
+    )
         : const Scaffold();
   }
 

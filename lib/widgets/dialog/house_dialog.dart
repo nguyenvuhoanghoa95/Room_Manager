@@ -65,22 +65,6 @@ class HouseDialog extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                controller: nameOwnerController,
-                decoration: InputDecoration(
-                  labelText: 'Người thêu',
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'VD: Nguyễn Văn A,B',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
                 controller: availableRoomsController,
                 decoration: InputDecoration(
                   labelText: 'Số lượng phòng',

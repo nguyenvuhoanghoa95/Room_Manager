@@ -37,9 +37,11 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
 
   // Remove invoice
   removeInvoice(int index) {
-    invoiceBox.deleteAt(index);
+    var inv = room!.invoices[index];
+    invoiceBox.delete(inv.key);
     setState(() {
-      invoices = List<Invoice>.from(invoiceBox.values);
+      invoices = List<Invoice>.from(room!.invoices);
+      filteredItems = List<Invoice>.from(room!.invoices);
     });
   }
 

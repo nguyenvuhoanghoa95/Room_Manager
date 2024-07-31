@@ -29,7 +29,7 @@ void main() async {
   }
 
   
-  if (houseBox.isEmpty && roomBox.isEmpty) {
+  if (houseBox.isEmpty) {
     // List<Invoice> invoice = [
     //   Invoice(300, 123, DateTime.parse("2024-05-01"), 5500000,5500000,5500000),
     // ];
@@ -37,8 +37,6 @@ void main() async {
 
     List<Room> newRooms = [
       Room(DateTime.now(), 301, "Nguyễn Vũ Hoàng Hóa"),
-      Room(DateTime.now(), 302, "Nguyễn Lê Đăng Duazn"),
-      Room(DateTime.now(), 303, "Lê Minh")
     ];
     roomBox.addAll(newRooms);
 
@@ -47,9 +45,7 @@ void main() async {
     room.save();
 
     List<House> newHouses = [
-      House('123 Main St', 'John Doe', 2, 3500, 1700),
-      House('456 Main St', 'Bob Johnson', 3, 3500, 1700),
-      House('234 Maple St', 'David Wilson', 5, 3500, 1700),
+      House('Dia chi', 'Nha tro', 2, 3500, 1700, true),
     ];
     houseBox.addAll(newHouses);
 

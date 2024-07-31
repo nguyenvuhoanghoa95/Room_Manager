@@ -139,12 +139,11 @@ class _RoomPageState extends State<RoomPage> {
 
   // Remove room
   removeRoom(int index) {
-    roomBox.delete(index);
-    if (rooms != null) {
-      setState(() {
-        filteredItems = List<Room>.from(roomBox.values);
-      });
-    }
+    var room = house!.rooms[index];
+    roomBox.delete(room.key);
+    setState(() {
+      filteredItems = List<Room>.from(house!.rooms);
+    });
   }
 
   //Navigate to invoicePage

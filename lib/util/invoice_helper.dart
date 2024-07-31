@@ -31,6 +31,8 @@ class InvoiceHelper {
     if (invoice?.surcharge != null) {
       totalAmount += invoice?.surcharge as num;
     }
+    totalAmount += (invoice?.wifiAmount ) as num;
+
     if(invoice!.debit!.isEmpty) return totalAmount;  
     if(invoice?.debit != null && currrentPayment.isEmpty){
       totalAmount -= invoice!.debit![0].amount as num;
@@ -50,21 +52,27 @@ class InvoiceHelper {
 
     costList.add([
       "Tiền Phòng",
-      "30 ngày giá : ${numberFormat.format(invoice?.amountAlreadyPay)}",
+      "30 ngày: ${numberFormat.format(invoice?.amountAlreadyPay)}",
       1,
       invoice?.amountAlreadyPay
     ]);
     costList.add([
       "Tiền Điện",
-      "Số mới: ${invoice?.newElectricityNumber}, Số Cũ: ${invoice?.currentElectricityNumber}\n${arr[0]}KWh x $electricityConsumed",
+      "Số mới: ${invoice?.newElectricityNumber}, Số Cũ: ${invoice?.currentElectricityNumber}\n${arr[0]} x $electricityConsumed Kwh",
       electricityConsumed,
       arr[0]
     ]);
     costList.add([
       "Tiền Nước",
-      "Số mới: ${invoice?.newWaterNumber}, Số Cũ: ${invoice?.currentWaterNumber}\n${arr[1]}KWh x $warterConsumed",
+      "Số mới: ${invoice?.newWaterNumber}, Số Cũ: ${invoice?.currentWaterNumber}\n${arr[1]} x $warterConsumed Khối",
       warterConsumed,
       arr[1]
+    ]);
+    costList.add([
+      "Tiền Dịch vụ",
+      "Wifi, rác...",
+      1,
+      invoice?.wifiAmount
     ]);
     if (invoice?.surcharge != null) {
       costList.add([

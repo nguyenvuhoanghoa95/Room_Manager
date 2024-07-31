@@ -12,8 +12,8 @@ late Box<Invoice> invoiceBox;
 
 //Box name
 
-const String houseTableName = "houses";
-const String roomTableName = "rooms";
-const String roomRenterTableName = "roomRenter";
-const String debitTableName = "debit";
-const String invoiceTableName = "invoices";
+const String houseTableName = "house1";
+const String roomTableName = "room1";
+const String roomRenterTableName = "roomRenter1";
+const String debitTableName = "debit1";
+const String invoiceTableName = "invoice1";

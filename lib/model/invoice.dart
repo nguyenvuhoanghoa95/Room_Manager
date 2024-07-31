@@ -38,17 +38,27 @@ class Invoice extends HiveObject {
   @HiveField(9)
   int? totalAmount;
 
+  @HiveField(10)
+  int? wifiAmount;
+
   Invoice(this.newElectricityNumber, this.newWaterNumber, this.invoiceCreateDate, this.amountAlreadyPay , this.surcharge);
 
   // Constructor
   Invoice.createInvoice(Room room) {
-    if (invoiceBox.isNotEmpty) {
-      if (room.currentElectricityNumber != 0 && room.currentWaterNumber != 0) { 
-          currentElectricityNumber = room.currentElectricityNumber;
-          currentWaterNumber = room.currentWaterNumber;
-          amountAlreadyPay = room.invoices.last.amountAlreadyPay;
-      }
+    invoiceCreateDate = DateTime.now();
+    wifiAmount = 0;
+    if (room.currentElectricityNumber != 0 && room.currentWaterNumber != 0) {
+      currentElectricityNumber = room.currentElectricityNumber;
+      currentWaterNumber = room.currentWaterNumber;
+    }
+    if (room.invoices.isNotEmpty) {
+      amountAlreadyPay = room.invoices.last.amountAlreadyPay;
+      wifiAmount = room.invoices.last.wifiAmount;
     }
     debit = HiveList(debitBox);
+  }
+
+  getRoom() {
+    return roomBox.values.where((room) => room.invoices.contains(this)).first;
   }
 }
