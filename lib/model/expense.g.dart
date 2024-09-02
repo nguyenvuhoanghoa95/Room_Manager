@@ -1,35 +1,41 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'debit.dart';
+part of 'expense.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class DebitAdapter extends TypeAdapter<Debit> {
+class ExpenseAdapter extends TypeAdapter<Expense> {
   @override
-  final int typeId = 4;
+  final int typeId = 6;
 
   @override
-  Debit read(BinaryReader reader) {
+  Expense read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Debit(
-      fields[0] as int?,
-      fields[1] as bool?,
+    return Expense(
+      fields[0] as String,
+      fields[1] as String,
+      fields[2] as int,
+      fields[3] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Debit obj) {
+  void write(BinaryWriter writer, Expense obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.amount)
+      ..write(obj.typeExpense)
       ..writeByte(1)
-      ..write(obj.status);
+      ..write(obj.typeOtherExpense)
+      ..writeByte(2)
+      ..write(obj.expense)
+      ..writeByte(3)
+      ..write(obj.expenseDate);
   }
 
   @override
@@ -38,7 +44,7 @@ class DebitAdapter extends TypeAdapter<Debit> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DebitAdapter &&
+      other is ExpenseAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

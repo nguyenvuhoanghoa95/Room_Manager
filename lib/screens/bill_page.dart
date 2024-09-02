@@ -10,6 +10,9 @@ import 'package:room_manager/util/invoice_helper.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../model/monthyear.dart';
+import '../util/date_helper.dart';
+
 // ignore: must_be_immutable
 class BillPage extends StatelessWidget {
   const BillPage({super.key});
@@ -17,10 +20,13 @@ class BillPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenshotController screenshotController = ScreenshotController();
-    final InvoiceAguments args =
-        ModalRoute.of(context)!.settings.arguments as InvoiceAguments;
-    final helper = InvoiceHelper.createWithAgument(args);
+    final InvoiceArguments args =
+    ModalRoute.of(context)!.settings.arguments as InvoiceArguments;
+    final helper = InvoiceHelper.createWithArgument(args);
     List costList = helper.getAmountInformation();
+    List debList = helper.getDebitInformation();
+    final dateHelper = DateHelper.createWithArgument(helper.invoice?.invoiceCreateDate);
+    MonthYear currMonth = dateHelper.getMonthYear();
 
     navigatorToInvoicePage() {
       Navigator.popUntil(context, (route) {
@@ -29,10 +35,15 @@ class BillPage extends StatelessWidget {
               arguments: helper.room);
           return true;
         }
+        if (route.settings.name == '/invoice-month-page' && helper.house != null) {
+          Navigator.popAndPushNamed(context, '/invoice-month-page',
+              arguments: helper.house);
+          return true;
+        }
         return false;
       });
     }
-
+    
     Future<void> captureAndShare() async {
       DateTime now = DateTime.now();
       int timestamp = now.millisecondsSinceEpoch;
@@ -53,7 +64,7 @@ class BillPage extends StatelessWidget {
 
         // Share the image
         final result =
-            await Share.shareXFiles([xFile], text: '');
+        await Share.shareXFiles([xFile], text: '');
         if (result.status == ShareResultStatus.success) {
           navigatorToInvoicePage();
         }
@@ -66,20 +77,17 @@ class BillPage extends StatelessWidget {
         leading: IconButton(
             onPressed: navigatorToInvoicePage,
             icon: const Icon(Icons.arrow_back)),
-        title: Column(
+        title: const Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
+              textAlign: TextAlign.center,
               "Hóa đơn thanh toán",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
               ),
-            ),
-            Text(
-              "Phòng : ${args.room.roomNumber}",
-              style: const TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
             ),
           ],
         ),
@@ -93,12 +101,71 @@ class BillPage extends StatelessWidget {
         ),
         elevation: 0.00,
       ),
-      body: Screenshot(
+      body:
+      Screenshot(
         controller: screenshotController,
-        child: SingleChildScrollView(
+        child: Container(
+          color: Colors.white,
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
+              const DottedLine(
+                dashLength: 8,
+                dashGapLength: 2,
+                lineThickness: 1,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ElevatedButton(
+                onPressed: captureAndShare,
+                style: ButtonStyle(
+                  backgroundColor: const WidgetStatePropertyAll<Color>(
+                      Color.fromARGB(255, 93, 185, 96)),
+                  minimumSize: WidgetStateProperty.all(const Size(600, 45)),
+                  elevation: WidgetStateProperty.all(0),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  "Hóa Đơn",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const DottedLine(
+                dashLength: 8,
+                dashGapLength: 2,
+                lineThickness: 1,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                  currMonth.toString(),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "Phòng: ${args.room.roomNumber}",
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  // ),
+                ],
+              ),
+              const SizedBox(
+                height: 5,
+              ),
               const DottedLine(
                 dashLength: 8,
                 dashGapLength: 2,
@@ -181,7 +248,7 @@ class BillPage extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    numberFormat.format(args.invoice.totalAmount),
+                    moneyVNFormat.format(args.invoice.totalAmount),
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -203,35 +270,13 @@ class BillPage extends StatelessWidget {
                 dashGapLength: 2,
                 lineThickness: 1,
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                margin: const EdgeInsets.only(
-                  top: 30,
-                  bottom: 50,
-                ),
-                child: ElevatedButton(
-                  onPressed: captureAndShare,
-                  style: ButtonStyle(
-                    backgroundColor: const WidgetStatePropertyAll<Color>(
-                        Color.fromARGB(255, 93, 185, 96)),
-                    minimumSize: WidgetStateProperty.all(const Size(600, 60)),
-                    elevation: WidgetStateProperty.all(0),
-                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                  child: const Text(
-                    "Xác nhận thanh toán",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: debList.length,
+                itemBuilder: (context, index) {
+                  return debRow(index, debList);
+                },
               ),
             ],
           ),
@@ -244,7 +289,7 @@ class BillPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(
-          height: 20,
+          height: 15,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -267,9 +312,47 @@ class BillPage extends StatelessWidget {
               ],
             ),
             Text(
-              numberFormat.format(costList[index][2] * costList[index][3]),
+              moneyVNFormat.format(costList[index][2] * costList[index][3]),
               style: const TextStyle(
                 fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget debRow(int index, costList) {
+    return Column(
+      children: [
+        const SizedBox(
+          height: 15,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${costList[index][0]}",
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "${costList[index][1]}",
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              moneyVNFormat.format(costList[index][2] * costList[index][3]),
+              style: const TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: tdRed,
               ),
             ),
           ],

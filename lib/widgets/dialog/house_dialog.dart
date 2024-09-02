@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/widgets/button/my_button.dart';
 
-class HouseDialog extends StatelessWidget {
+class HouseDialog extends StatefulWidget {
   final addressController;
   final nameOwnerController;
   final availableRoomsController;
   final electricityPriceController;
   final waterPriceController;
+  final waterByPersonController;
 
   final VoidCallback? create;
   final VoidCallback cancel;
@@ -23,14 +25,29 @@ class HouseDialog extends StatelessWidget {
       this.nameOwnerController,
       this.availableRoomsController,
       this.electricityPriceController,
-      this.waterPriceController});
+      this.waterPriceController,
+      this.waterByPersonController});
+
+  @override
+  State<HouseDialog> createState() => _HouseDialogState();
+}
+
+class _HouseDialogState extends State<HouseDialog> {
+
+  bool? waterByPerson;
+  @override
+  void initState() {
+    super.initState();
+    waterByPerson = bool.parse(widget.waterByPersonController.text);
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return AlertDialog(
       backgroundColor: tbBGColor,
       content: SizedBox(
-        height: 500,
+        height: 380,
         width: 500,
         child: ListView(
           children: [
@@ -49,7 +66,7 @@ class HouseDialog extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                controller: addressController,
+                controller: widget.addressController,
                 decoration: InputDecoration(
                   labelText: 'Địa chỉ',
                   filled: true,
@@ -62,57 +79,72 @@ class HouseDialog extends StatelessWidget {
                 ),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                controller: availableRoomsController,
-                decoration: InputDecoration(
-                  labelText: 'Số lượng phòng',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: electricityPriceController,
+                controller: widget.electricityPriceController,
                 decoration: InputDecoration(
                   labelText: 'Giá điện',
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: 'Mặc định : 3500đ',
+                  hintText: 'Mặc định : 3.500đ',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide.none,
                   ),
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  ThousandsFormatter(),
+                ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                controller: waterPriceController,
+                controller: widget.waterPriceController,
                 decoration: InputDecoration(
-                  labelText: 'Giá nước',
+                  labelText: 'Giá nước (tính khối / đầu người)',
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: 'Mặc định: 17000',
+                  hintText: 'Mặc định: 20.000',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide.none,
                   ),
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  ThousandsFormatter(),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(1.0),
+              child: Row(
+                children: [
+                  Radio(
+                    value: false,
+                    groupValue: waterByPerson,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.waterByPersonController.text = "false";
+                        waterByPerson = value;
+                      });
+                    },
+                  ),
+                  const Text('Tính khối'),
+                  Radio(
+                    value: true,
+                    groupValue: waterByPerson,
+                    onChanged: (value) {
+                      setState(() {
+                        widget.waterByPersonController.text = "true";
+                        waterByPerson = value;
+                      });
+                    },
+                  ),
+                  const Text('Đầu người'),
+                ],
               ),
             ),
             //button --> save and close
@@ -125,14 +157,14 @@ class HouseDialog extends StatelessWidget {
                       child: MyButton(
                           text: "Lưu",
                           color: Colors.green,
-                          onPressed: () => create != null ? create!() : edit!())),
+                          onPressed: () => widget.create != null ? widget.create!() : widget.edit!())),
                   const SizedBox(
                     width: 40,
                   ),
                   // close button
                   Expanded(
                       child:
-                          MyButton(text: "Hủy", color: Colors.green, onPressed: cancel)),
+                          MyButton(text: "Hủy", color: Colors.green, onPressed: widget.cancel)),
                 ],
               ),
             )

@@ -4,12 +4,13 @@ import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/constants/const.dart';
 import 'package:room_manager/database/database_setting.dart';
-import 'package:room_manager/model/debit.dart';
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
 import 'package:room_manager/util/invoice_aguments.dart';
 import 'package:room_manager/util/invoice_helper.dart';
 import 'package:room_manager/widgets/appbar/invoice_appbar.dart';
+
+import '../model/house.dart';
 
 class InvoiceCreatePage extends StatefulWidget {
   const InvoiceCreatePage({super.key});
@@ -19,6 +20,7 @@ class InvoiceCreatePage extends StatefulWidget {
 }
 
 class _InvoiceCreatePage extends State<InvoiceCreatePage> {
+  House? house;
   Room? room;
   Invoice? invoice;
   final _formKey = GlobalKey<FormState>();
@@ -49,7 +51,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   final _crrWarNumController = TextEditingController();
   final _newElecNumController = TextEditingController();
   final _diffAmountController = TextEditingController();
-  final _ownAmountController = TextEditingController();
+  final _debtAmountController = TextEditingController();
   final _noteController = TextEditingController();
   final _newWarNumController = TextEditingController();
   final _newWifiController = TextEditingController();
@@ -65,30 +67,25 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
           room = argument;
           invoice = Invoice.createInvoice(room!);
           _dateController.text = invoice!.invoiceCreateDate.toString().split(" ")[0];
+          _crrElecNumController.text = invoice!.currentElectricityNumber.toString();
+          _crrWarNumController.text = invoice!.currentWaterNumber.toString();
           _newWifiController.text = invoice!.wifiAmount.toString();
           if (invoice!.amountAlreadyPay != null) {
             _amoutController.text =
                 moneyFormat.format(invoice!.amountAlreadyPay);
           }
-          helper =
-              InvoiceHelper.createWithAgument(InvoiceAguments(room!, invoice!));
+          house = houseBox.values.where((house) => house.rooms.contains(room)).first;
+          helper = InvoiceHelper.createWithArgument(InvoiceArguments(house!, room!, invoice!));
         } else {
           edit = true;
           invoice = argument as Invoice?;
           room = roomBox.values.where((room) => room.invoices.contains(invoice)).first;
-          helper = InvoiceHelper.createWithAgument(InvoiceAguments(room!, invoice!));
+          house = houseBox.values.where((house) => house.rooms.contains(room)).first;
+          helper = InvoiceHelper.createWithArgument(InvoiceArguments(house!, room!, invoice!));
           setInvoiceValue(invoice!);
         }
       });
     });
-
-    // _amoutController.addListener(() {
-    //   if (_amoutController.text.isNotEmpty) {
-    //     var money = _amoutController.text.replaceAll(",", ".");
-    //     var formattedValue = moneyFormat.format(double.parse(money));
-    //     _amoutController.text = formattedValue;
-    //   }
-    // });
   }
 
   @override
@@ -99,7 +96,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
     _crrWarNumController.dispose();
     _newElecNumController.dispose();
     _diffAmountController.dispose();
-    _ownAmountController.dispose();
+    _debtAmountController.dispose();
     _noteController.dispose();
     _newWarNumController.dispose();
     _newWifiController.dispose();
@@ -120,39 +117,23 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   }
 
   saveInvoice() {
-    if (invoice!.currentWaterNumber == null) {
-      invoice!.currentWaterNumber = int.parse(_crrWarNumController.text);
-    }
-    if (invoice!.currentElectricityNumber == null) {
+    if (room!.invoices.isEmpty) {
       invoice!.currentElectricityNumber = int.parse(_crrElecNumController.text);
     }
     invoice!.newElectricityNumber = int.parse(_newElecNumController.text);
 
-    invoice!.newWaterNumber = int.parse(_newWarNumController.text);
-    invoice!.wifiAmount = int.parse(_newWifiController.text.replaceAll(",", ""));
-    if (!edit!) {
-      room!.currentWaterNumber = int.parse(_newWarNumController.text);
-      room!.currentElectricityNumber = int.parse(_newElecNumController.text);
-      var debitAmount = _ownAmountController.text.isEmpty
-          ? "0"
-          : _ownAmountController.text.replaceAll(",", "");
-      var newDebit = Debit(int.parse(debitAmount), true);
-      debitBox.add(newDebit);
-      invoice!.debit?.add(newDebit);
-    } else {
-      var debit = invoice!.debit;
-      if (debit!.isNotEmpty) {
-        if (debit[0].amount! >
-            int.parse(_ownAmountController.text.replaceAll(",", ""))) {
-          debit[0].amount = debit[0].amount! -
-              int.parse(_ownAmountController.text.replaceAll(",", ""));
-        } else {
-          debit[0].amount = 0;
-          debit[0].status = true;
-        }
-        debit[0].save();
+    if (house?.isWaterPerPerson == true) {
+      if (!edit!) {
+        invoice!.currentWaterNumber = 0;
       }
+      invoice!.newWaterNumber = (invoice!.currentWaterNumber! + room!.numPerson);
+    } else {
+      if (room!.invoices.isEmpty) {
+        invoice!.currentWaterNumber = int.parse(_crrWarNumController.text);
+      }
+      invoice!.newWaterNumber = int.parse(_newWarNumController.text);
     }
+    invoice!.wifiAmount = int.parse(_newWifiController.text.replaceAll(",", ""));
     invoice!.amountAlreadyPay =
         int.parse(_amoutController.text.replaceAll(",", ""));
     invoice!.surcharge = _diffAmountController.text.isNotEmpty
@@ -160,27 +141,40 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
         : 0;
     invoice!.invoiceCreateDate = DateTime.parse(_dateController.text);
     invoice!.note = _noteController.text;
-    invoice!.totalAmount = helper?.caculateTotalAmount(currentPayment);
+    invoice!.totalAmount = helper?.calculateTotalAmount(currentPayment);
+    invoice!.debitAmount = invoice!.totalAmount;
+
     save();
   }
 
   setInvoiceValue(Invoice invoice) {
-    currentPayment = "final-pay";
+    // get previous invoice
+    var preInvoice = helper!.getPreviousInvoice();
     _dateController.text = invoice.invoiceCreateDate.toString().split(" ")[0];
     _amoutController.text =
         moneyFormat.format(invoice.amountAlreadyPay).toString();
+
+    if (preInvoice != null) {
+      invoice.currentElectricityNumber = preInvoice.newElectricityNumber;
+      invoice.currentWaterNumber = preInvoice.newWaterNumber;
+    }
     _crrElecNumController.text = invoice.currentElectricityNumber.toString();
     _crrWarNumController.text = invoice.currentWaterNumber.toString();
+
     _newElecNumController.text = invoice.newElectricityNumber.toString();
+    _newWarNumController.text = invoice.newWaterNumber.toString();
+
     _diffAmountController.text =
         moneyFormat.format(invoice.surcharge).toString();
-    _ownAmountController.text = invoice.debit!.isNotEmpty
-        ? moneyFormat.format(invoice.debit!.first.amount).toString()
-        : "0";
+    _debtAmountController.text = (invoice.debitAmount!=null)?moneyFormat.format(invoice.debitAmount).toString():"";
     _noteController.text = invoice.note!;
-    _newWarNumController.text = invoice.newWaterNumber.toString();
     _newWifiController.text = invoice.wifiAmount.toString();
     totalAmount = invoice.totalAmount!;
+    if (invoice.debitAmount == null || invoice.debitAmount == 0) {
+      currentPayment = "final-pay";
+    } else {
+      currentPayment = "partial-pay";
+    }
   }
 
   save() {
@@ -197,7 +191,8 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   //navigate to bill page
   navigateToBillPage() async {
     Navigator.pushReplacementNamed(context, '/invoice-page/bill',
-        arguments: InvoiceAguments(room!, invoice!));
+        //arguments: InvoiceArguments(house!, room!, invoice!));
+        arguments: InvoiceArguments(house!, room!, invoice!));
   }
 
   @override
@@ -271,8 +266,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                   ),
                 ),
                 Visibility(
-                  visible: invoice?.currentElectricityNumber == null &&
-                      invoice?.currentWaterNumber == null,
+                  visible: room!.invoices.isEmpty,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -307,6 +301,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         ),
                         Expanded(
                           child: TextFormField(
+                              enabled:  house?.isWaterPerPerson == false,
                               controller: _crrWarNumController,
                               keyboardType: TextInputType.number,
                               decoration: InputDecoration(
@@ -335,19 +330,11 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       Expanded(
                         child: TextFormField(
                             validator: (value) {
-                              if (edit!) {
-                                return null;
-                              } else if (value == null || value.isEmpty) {
+                              if (value == null || value.isEmpty) {
                                 return 'Vui lòng nhập thông tin';
-                              } else if (room!.currentElectricityNumber !=
+                              } else if (invoice!.currentElectricityNumber !=
                                   0 &&
-                                  room!.currentElectricityNumber -
-                                      int.parse(value) >
-                                      0) {
-                                return "Số điện cũ : ${room!.currentElectricityNumber == 0 ? "" : room!.currentElectricityNumber}\nvui lòng nhập lại";
-                              } else if (room!.currentElectricityNumber !=
-                                  0 &&
-                                  room!.currentElectricityNumber -
+                                  invoice!.currentElectricityNumber! -
                                       int.parse(value) >
                                       0) {
                                 return "Số điện thấp hơn số cũ \nvui lòng nhập lại";
@@ -360,9 +347,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                               labelText: 'Số điện mới',
                               filled: true,
                               fillColor: Colors.white,
-                              hintText: !edit!
-                                  ? 'Cũ : ${room?.currentElectricityNumber}'
-                                  : "",
+                              hintText: 'Cũ : ${invoice?.currentElectricityNumber}',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                                 borderSide: BorderSide.none,
@@ -376,16 +361,29 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         width: 10,
                       ),
                       Expanded(
+                        //visible: house?.isWaterPerPerson == false,
                         child: TextFormField(
+                            validator: (value) {
+                              if (house!.isWaterPerPerson == true) {
+                                return null;
+                              }
+                              if (value == null || value.isEmpty) {
+                                return 'Vui lòng nhập thông tin';
+                              } else if (invoice!.currentWaterNumber != 0 &&
+                                  invoice!.currentWaterNumber! -
+                                      int.parse(value) > 0) {
+                                return "Số thấp hơn số cũ \nvui lòng nhập lại";
+                              }
+                              return null;
+                            },
                             controller: _newWarNumController,
                             keyboardType: TextInputType.number,
+                            enabled:  house?.isWaterPerPerson == false,
                             decoration: InputDecoration(
                               labelText: 'Số nước mới',
                               filled: true,
                               fillColor: Colors.white,
-                              hintText: !edit!
-                                  ? 'Cũ : ${room?.currentWaterNumber}'
-                                  : "",
+                              hintText: 'Cũ : ${invoice?.currentWaterNumber}',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                                 borderSide: BorderSide.none,
@@ -439,27 +437,27 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                       ]),
                 ),
 
-                Visibility(
-                  visible: !edit!,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                        controller: _ownAmountController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Tiền nợ',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        inputFormatters: [
-                          ThousandsFormatter(),
-                        ]),
-                  ),
-                ),
+                // Visibility(
+                //   visible: !edit!,
+                //   child: Padding(
+                //     padding: const EdgeInsets.all(8.0),
+                //     child: TextFormField(
+                //         controller: _debtAmountController,
+                //         keyboardType: TextInputType.number,
+                //         decoration: InputDecoration(
+                //           labelText: 'Tiền nợ',
+                //           filled: true,
+                //           fillColor: Colors.white,
+                //           border: OutlineInputBorder(
+                //             borderRadius: BorderRadius.circular(10.0),
+                //             borderSide: BorderSide.none,
+                //           ),
+                //         ),
+                //         inputFormatters: [
+                //           ThousandsFormatter(),
+                //         ]),
+                //   ),
+                // ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -478,7 +476,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                 ),
 
                 Visibility(
-                  visible: edit!,
+                  visible: false,
                   child: Row(
                     children: [
                       Radio(
@@ -487,6 +485,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         onChanged: (value) {
                           setState(() {
                             currentPayment = value!;
+                            _debtAmountController.text = "0";
                           });
                         },
                       ),
@@ -495,15 +494,9 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         value: 'partial-pay',
                         groupValue: currentPayment,
                         onChanged: (value) {
-                          if (int.parse(_ownAmountController.text
-                              .replaceAll(",", "")) !=
-                              0) {
-                            setState(() {
-                              currentPayment = value!;
-                            });
-                          } else {
-                            return;
-                          }
+                          setState(() {
+                            currentPayment = value!;
+                          });
                         },
                       ),
                       const Text('Thanh toán thiếu'),
@@ -511,13 +504,13 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                   ),
                 ),
                 Visibility(
-                  visible: edit!,
+                  visible: false,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
                         validator: (value) {
                           if (edit! &&
-                              (invoice!.debit![0].amount! <
+                              (invoice!.totalAmount! <
                                   int.parse(
                                       value!.replaceAll(",", "")))) {
                             return "Số tiền phải thanh toán lớn hơn số nợ";
@@ -527,7 +520,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
                         enabled: currentPayment.isNotEmpty &&
                             currentPayment != 'final-pay',
                         onEditingComplete: onEdit,
-                        controller: _ownAmountController,
+                        controller: _debtAmountController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: 'Số tiền nợ',
@@ -587,7 +580,7 @@ class _InvoiceCreatePage extends State<InvoiceCreatePage> {
   }
 
   void onEdit() {
-    if (_ownAmountController.text.isEmpty) {
+    if (_debtAmountController.text.isEmpty) {
       setState(() {
         currentPayment = "final-pay";
       });

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/model/house.dart';
 import 'package:room_manager/widgets/dialog/elec_and_water_dialog.dart';
-
 class RoomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   final  House? house;
@@ -36,16 +35,16 @@ class RoomAppBar extends StatelessWidget implements PreferredSizeWidget {
       },
     );
   }
-  
-  
 
   @override
   Widget build(BuildContext context) {
+
+    var title = "Nhà: ${house!.address}";
     return AppBar(
       backgroundColor: tbBGColor,
-      title: const Text(
-        "Danh Sách Phòng",
-        style: TextStyle(
+      title: Text(
+        title,
+        style: const TextStyle(
           fontSize: 25,
           fontWeight: FontWeight.w500,
         ),

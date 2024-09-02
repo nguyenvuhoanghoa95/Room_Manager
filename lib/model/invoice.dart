@@ -1,5 +1,4 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:room_manager/model/debit.dart';
 import 'package:room_manager/model/room.dart';
 
 import '../database/database_setting.dart';
@@ -33,13 +32,19 @@ class Invoice extends HiveObject {
   int? surcharge;
 
   @HiveField(8)
-  HiveList<Debit>? debit;
-
-  @HiveField(9)
   int? totalAmount;
 
-  @HiveField(10)
+  @HiveField(9)
   int? wifiAmount;
+
+  @HiveField(10)
+  int? electAmount;
+
+  @HiveField(11)
+  int? waterAmount;
+
+  @HiveField(12)
+  int? debitAmount;
 
   Invoice(this.newElectricityNumber, this.newWaterNumber, this.invoiceCreateDate, this.amountAlreadyPay , this.surcharge);
 
@@ -47,15 +52,15 @@ class Invoice extends HiveObject {
   Invoice.createInvoice(Room room) {
     invoiceCreateDate = DateTime.now();
     wifiAmount = 0;
-    if (room.currentElectricityNumber != 0 && room.currentWaterNumber != 0) {
+    if (room.invoices.isNotEmpty) {
+      amountAlreadyPay = room.invoices.last.amountAlreadyPay;
+      currentElectricityNumber = room.invoices.last.newElectricityNumber;
+      currentWaterNumber = room.invoices.last.newWaterNumber;
+      wifiAmount = room.invoices.last.wifiAmount;
+    } else {
       currentElectricityNumber = room.currentElectricityNumber;
       currentWaterNumber = room.currentWaterNumber;
     }
-    if (room.invoices.isNotEmpty) {
-      amountAlreadyPay = room.invoices.last.amountAlreadyPay;
-      wifiAmount = room.invoices.last.wifiAmount;
-    }
-    debit = HiveList(debitBox);
   }
 
   getRoom() {

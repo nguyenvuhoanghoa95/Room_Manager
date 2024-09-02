@@ -4,41 +4,56 @@ import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
 import 'package:room_manager/util/invoice_aguments.dart';
 
+import 'date_helper.dart';
+
 class InvoiceHelper {
   House? house;
   Invoice? invoice;
   Room? room;
-  InvoiceAguments? invoiceAguments;
+  InvoiceArguments? invoiceArguments;
   List costList = [];
+  List debList = [];
 
   InvoiceHelper();
 
-  InvoiceHelper.createWithAgument(this.invoiceAguments) {
-    room = invoiceAguments?.room;
-    invoice = invoiceAguments?.invoice;
+  InvoiceHelper.createWithArgument(this.invoiceArguments) {
+    house = invoiceArguments?.house;
+    room = invoiceArguments?.room;
+    invoice = invoiceArguments?.invoice;
   }
 
-  caculateTotalAmount([currrentPayment]) {
+  getPreviousInvoice() {
+    if (room!.invoices.isEmpty || room!.invoices.first == invoice) {
+      return null;
+    }
+    var previous = room!.invoices. first;
+    for (var inv in room!.invoices) {
+      if (inv != invoice) {
+        previous = inv;
+      } else {
+        return previous;
+      }
+    }
+    return previous;
+  }
+  calculateTotalAmount([currentPayment]) {
     var arr = room?.getElecAndWatPrice();
-    num totalAmount = 0;
+    int totalAmount = 0;
     var electricityConsumed =
         invoice!.newElectricityNumber! - invoice!.currentElectricityNumber!;
-    var warterConsumed =
+    var waterConsumed =
         invoice!.newWaterNumber! - invoice!.currentWaterNumber!;
-    totalAmount += invoice?.amountAlreadyPay as num;
-    totalAmount += electricityConsumed * arr[0];
-    totalAmount += warterConsumed * arr[1];
-    if (invoice?.surcharge != null) {
-      totalAmount += invoice?.surcharge as num;
-    }
-    totalAmount += (invoice?.wifiAmount ) as num;
+    invoice!.electAmount = (electricityConsumed * arr[0]) as int?;
+    invoice!.waterAmount = (waterConsumed * arr[1]) as int?;
 
-    if(invoice!.debit!.isEmpty) return totalAmount;  
-    if(invoice?.debit != null && currrentPayment.isEmpty){
-      totalAmount -= invoice!.debit![0].amount as num;
-    }else{
-      totalAmount += invoice!.debit![0].amount as num;
+    totalAmount += invoice!.amountAlreadyPay!;
+    totalAmount += invoice!.electAmount!;
+    totalAmount += invoice!.waterAmount!;
+    if (invoice?.surcharge != null) {
+      totalAmount += invoice!.surcharge!;
     }
+    totalAmount += (invoice?.wifiAmount )!;
+
     return totalAmount;
   }
 
@@ -52,45 +67,84 @@ class InvoiceHelper {
 
     costList.add([
       "Tiền Phòng",
-      "30 ngày: ${numberFormat.format(invoice?.amountAlreadyPay)}",
+      "1 tháng",
       1,
       invoice?.amountAlreadyPay
     ]);
     costList.add([
       "Tiền Điện",
-      "Số mới: ${invoice?.newElectricityNumber}, Số Cũ: ${invoice?.currentElectricityNumber}\n${arr[0]} x $electricityConsumed Kwh",
+      "Số cũ: ${invoice?.currentElectricityNumber}. Số mới: ${invoice?.newElectricityNumber}\n${moneyVNFormat.format(arr[0])}x $electricityConsumed Kwh",
       electricityConsumed,
       arr[0]
     ]);
-    costList.add([
-      "Tiền Nước",
-      "Số mới: ${invoice?.newWaterNumber}, Số Cũ: ${invoice?.currentWaterNumber}\n${arr[1]} x $warterConsumed Khối",
-      warterConsumed,
-      arr[1]
-    ]);
-    costList.add([
-      "Tiền Dịch vụ",
-      "Wifi, rác...",
-      1,
-      invoice?.wifiAmount
-    ]);
-    if (invoice?.surcharge != null) {
+
+    if (house?.isWaterPerPerson == true) {
+      costList.add([
+        "Tiền Nước",
+        "${moneyVNFormat.format(arr[1])} x ${room?.numPerson} Người",
+        warterConsumed,
+        arr[1]
+      ]);
+    } else {
+      costList.add([
+        "Tiền Nước",
+        "Số cũ: ${invoice?.currentWaterNumber}. Số mới: ${invoice?.newWaterNumber}\n${moneyVNFormat.format(arr[1])}x $warterConsumed Khối",
+        warterConsumed,
+        arr[1]
+      ]);
+    }
+    if (invoice?.wifiAmount != 0 && invoice?.wifiAmount != null) {
+      costList.add([
+        "Tiền Dịch vụ",
+        "Wifi, rác...",
+        1,
+        invoice?.wifiAmount
+      ]);
+    }
+
+    if (invoice?.surcharge != 0 && invoice?.surcharge != null) {
       costList.add([
         "Tiền khác",
-        "Chi phí khác: ${numberFormat.format(invoice?.surcharge)}",
+        "Chi phí khác: ${moneyVNFormat.format(invoice?.surcharge)}",
         1,
         invoice?.surcharge
       ]);
     }
-    if (invoice!.debit!.isNotEmpty && invoice?.debit != null && invoice?.debit![0].amount != 0) {
-      costList.add([
-        "Tiền Nợ",
-        "Tiền còn nợ lại: ${numberFormat.format(invoice?.debit?[0].amount)}",
-        1,
-        invoice?.debit?[0].amount
-      ]);
-    }
 
     return costList;
+  }
+
+  getDebitAmount() {
+    var totalDeb = 0;
+    var lstDebit = room?.invoices.where((inv) => inv.debitAmount != 0 && inv != invoice);
+    if (lstDebit!.isNotEmpty) {
+      for(var deb in lstDebit) {
+        totalDeb += deb.debitAmount!;
+      }
+    }
+    return totalDeb;
+  }
+
+  getDebitInformation() {
+    var lstDebit = room?.invoices.where((inv) => inv.debitAmount != 0 && inv != invoice);
+    if (lstDebit!.isNotEmpty) {
+      var detail = "";
+      var totalDeb = 0;
+
+      for(var deb in lstDebit) {
+        final dateHelper = DateHelper.createWithArgument(deb.invoiceCreateDate);
+        var monthDeb = dateHelper.getMonthYear();
+        detail = (deb==lstDebit.last)? "$detail$monthDeb: ${moneyVNFormat.format(deb.debitAmount)}"
+            : "$detail$monthDeb: ${moneyVNFormat.format(deb.debitAmount)}\n";
+        totalDeb += deb.debitAmount!;
+      }
+      debList.add([
+        "Tiền Nợ",
+        detail,
+        1,
+        totalDeb
+      ]);
+    }
+    return debList;
   }
 }

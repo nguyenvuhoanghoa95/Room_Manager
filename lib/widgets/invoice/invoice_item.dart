@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:room_manager/constants/colors.dart';
 import 'package:room_manager/constants/const.dart';
 import 'package:room_manager/model/invoice.dart';
@@ -7,16 +8,20 @@ class InvoiceItem extends StatelessWidget {
   final Invoice invoice;
   final VoidCallback navigateToInvoicePage;
   final VoidCallback removeFuntion;
+  final bool isShowMenu;
 
    const InvoiceItem(
-      {super.key,
-      required this.invoice,
-      required this.navigateToInvoicePage,
-      required this.removeFuntion
+      {
+        super.key,
+        required this.invoice,
+        required this.navigateToInvoicePage,
+        required this.removeFuntion,
+        required this.isShowMenu
       });
 
   @override
   Widget build(BuildContext context) {
+    var room = invoice.getRoom();
     return GestureDetector(
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -34,7 +39,7 @@ class InvoiceItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "Ngày thanh toán",
+                    "Phòng",
                     style: TextStyle(
                       fontSize: 16,
                       color: tbBlack,
@@ -42,7 +47,7 @@ class InvoiceItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    invoice.invoiceCreateDate.toString().split(" ")[0],
+                    room.roomNumber.toString(),
                     style: const TextStyle(
                       fontSize: 16,
                       color: tbBlack,
@@ -55,14 +60,33 @@ class InvoiceItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "Tiền nợ",
+                    "Ngày tạo hóa đơn",
                     style: TextStyle(
                       fontSize: 15,
                       color: tbBlack,
                     ),
                   ),
                   Text(
-                   invoice.debit!.isNotEmpty ? numberFormat.format(invoice.debit?[0].amount) : "Không có nợ",
+                    DateFormat("dd-MM-yyy").format(invoice.invoiceCreateDate!),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: tbBlack,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    invoice.debitAmount != 0 ?"Tiền nợ":"Đã thanh toán",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: tbBlack,
+                    ),
+                  ),
+                  Text(
+                    invoice.debitAmount != 0 ? numberFormat.format(invoice.debitAmount) : "",
                     style: const TextStyle(
                       fontSize: 15,
                       color: Colors.redAccent,
@@ -74,7 +98,7 @@ class InvoiceItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "Tổng tiền đã thu",
+                    "Tiền hóa đơn",
                     style: TextStyle(
                       fontSize: 15,
                       color: tbBlack,
@@ -94,6 +118,9 @@ class InvoiceItem extends StatelessWidget {
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+            Visibility(
+              visible: isShowMenu,
+              child:
               PopupMenuButton(
                 position: PopupMenuPosition.under,
                 itemBuilder: (context) => [
@@ -103,6 +130,7 @@ class InvoiceItem extends StatelessWidget {
                   )
                 ],
               ),
+            ),
             ],
           ),
         ),

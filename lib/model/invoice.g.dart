@@ -26,15 +26,17 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       ..currentElectricityNumber = fields[2] as int?
       ..currentWaterNumber = fields[3] as int?
       ..note = fields[6] as String?
-      ..debit = (fields[8] as HiveList?)?.castHiveList()
-      ..totalAmount = fields[9] as int?
-      ..wifiAmount = fields[10] as int?;
+      ..totalAmount = fields[8] as int?
+      ..wifiAmount = fields[9] as int?
+      ..electAmount = fields[10] as int?
+      ..waterAmount = fields[11] as int?
+      ..debitAmount = fields[12] as int?;
   }
 
   @override
   void write(BinaryWriter writer, Invoice obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.newElectricityNumber)
       ..writeByte(1)
@@ -52,11 +54,15 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       ..writeByte(7)
       ..write(obj.surcharge)
       ..writeByte(8)
-      ..write(obj.debit)
-      ..writeByte(9)
       ..write(obj.totalAmount)
+      ..writeByte(9)
+      ..write(obj.wifiAmount)
       ..writeByte(10)
-      ..write(obj.wifiAmount);
+      ..write(obj.electAmount)
+      ..writeByte(11)
+      ..write(obj.waterAmount)
+      ..writeByte(12)
+      ..write(obj.debitAmount);
   }
 
   @override

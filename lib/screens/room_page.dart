@@ -7,6 +7,8 @@ import 'package:room_manager/widgets/appbar/room_appbar.dart';
 import 'package:room_manager/widgets/dialog/room_dialog.dart';
 import 'package:room_manager/widgets/room/room_item.dart';
 
+import '../constants/const.dart';
+
 class RoomPage extends StatefulWidget {
   const RoomPage({super.key});
 
@@ -18,7 +20,7 @@ class _RoomPageState extends State<RoomPage> {
   House? house;
   List<Room>? rooms;
   List<Room>? filteredItems = [];
-
+ // final _formKey = GlobalKey<FormState>();
   final _searchController = TextEditingController();
   final _electricityPriceController = TextEditingController();
   final _waterPriceController = TextEditingController();
@@ -27,6 +29,11 @@ class _RoomPageState extends State<RoomPage> {
   final _renterController = TextEditingController();
   final _electricNumber = TextEditingController();
   final _waterNumber = TextEditingController();
+  final _datePayController = TextEditingController();
+  final _telephoneController = TextEditingController();
+  final _numPersonController = TextEditingController();
+  final _depositAmountController = TextEditingController();
+
 
   @override
   void initState() {
@@ -54,15 +61,13 @@ class _RoomPageState extends State<RoomPage> {
 
   //save
   saveRoom({int? index}) {
-    if (_roomNameController.text.isNotEmpty &&
-        _datePickerController.text.isNotEmpty &&
-        _renterController.text.isNotEmpty) {
+    if (_roomNameController.text.isNotEmpty) {
       if (index == null) {
         //Add action
         addRoom();
       } else {
         //Edit action
-        editRoom(rooms![index]);
+        editRoom(filteredItems![index]);
       }
     }
     setState(() {
@@ -80,6 +85,10 @@ class _RoomPageState extends State<RoomPage> {
           renterController: _renterController,
           roomNameController: _roomNameController,
           datePickerController: _datePickerController,
+          datePayController: _datePayController,
+          telephoneController: _telephoneController,
+          numPersonController: _numPersonController,
+          depositAmountController: _depositAmountController,
           create: () => saveRoom(),
           cancel: () => cancel(),
         );
@@ -88,8 +97,14 @@ class _RoomPageState extends State<RoomPage> {
   }
 
   addRoom() {
-    var newRoom = Room(DateTime.parse(_datePickerController.text),
-        int.parse(_roomNameController.text), _renterController.text);
+    var datePay = (_datePayController.text.isEmpty)? 1 : int.parse(_datePayController.text);
+    var numPer = (_numPersonController.text.isEmpty)? 1 : int.parse(_numPersonController.text);
+    var date = (_datePickerController.text.isEmpty)? DateTime.now() :  DateTime.parse(_datePickerController.text);
+    var deposit = (_depositAmountController.text.isEmpty)? 0 : int.parse(_depositAmountController.text.replaceAll(",", ""));
+
+    var newRoom = Room(date,
+        int.parse(_roomNameController.text), _renterController.text,
+        datePay, _telephoneController.text, numPer,deposit);
     roomBox.add(newRoom);
     house?.rooms.add(newRoom);
     house?.save();
@@ -101,6 +116,9 @@ class _RoomPageState extends State<RoomPage> {
     editRoom.roomNumber = int.parse(_roomNameController.text);
     if(int.parse(_electricNumber.text) != 0) editRoom.currentElectricityNumber = int.parse(_electricNumber.text);
     if(int.parse(_waterNumber.text) != 0)  editRoom.currentWaterNumber = int.parse(_waterNumber.text);
+    editRoom.datePay = int.parse(_datePayController.text);
+    editRoom.depositAmount = int.parse(_depositAmountController.text.replaceAll(",", ""));
+    editRoom.numPerson = (_numPersonController.text.isEmpty)? 1 : int.parse(_numPersonController.text);
     return editRoom.save();
   }
 
@@ -115,6 +133,10 @@ class _RoomPageState extends State<RoomPage> {
         _roomNameController.text = "${room.roomNumber}";
         _electricNumber.text = "${room.currentElectricityNumber}";
         _waterNumber.text = "${room.currentWaterNumber}";
+        _datePayController.text = "${room.datePay}";
+        _depositAmountController.text = moneyFormat.format(room.depositAmount).toString();//"${room.depositAmount}";
+        _numPersonController.text = "${room.numPerson}";
+
         //Open dialog
         return RoomDialog(
           renterController: _renterController,
@@ -122,6 +144,9 @@ class _RoomPageState extends State<RoomPage> {
           datePickerController: _datePickerController,
           electricNumber: _electricNumber,
           waterNumber: _waterNumber,
+          datePayController: _datePayController,
+          numPersonController : _numPersonController,
+          depositAmountController : _depositAmountController,
           edit: () => saveRoom(index: index),
           cancel: () => cancel(),
         );
@@ -134,6 +159,10 @@ class _RoomPageState extends State<RoomPage> {
     _roomNameController.clear();
     _datePickerController.clear();
     _renterController.clear();
+    _datePayController.clear();
+    _telephoneController.clear();
+    _numPersonController.clear();
+    _depositAmountController.clear();
     Navigator.of(context).pop();
   }
 
@@ -150,7 +179,34 @@ class _RoomPageState extends State<RoomPage> {
   navigateToInvoicePage(Room room) {
     Navigator.pushNamed(context, '/invoice-page', arguments: room);
   }
-
+  navigateToInvoiceMonthPage() {
+    Navigator.pushNamed(
+        context,
+        '/invoice-month-page',
+        arguments: house
+    );
+  }
+  navigateToCollectInvoicePage() {
+    Navigator.pushNamed(
+        context,
+        '/collect-invoice-page',
+        arguments: house
+    );
+  }
+  navigateToExpensePage() {
+    Navigator.pushNamed(
+        context,
+        '/expense-page',
+        arguments: house
+    );
+  }
+  navigateToReportPage() {
+    Navigator.pushNamed(
+        context,
+        '/report-page',
+        arguments: house
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,7 +222,47 @@ class _RoomPageState extends State<RoomPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               child: Column(
                 children: [
-                  searchBox(),
+                  Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => navigateToInvoiceMonthPage(),
+                        style: TextButton.styleFrom(backgroundColor: Colors.blue),
+                        child: const Text(
+                          "Hóa Đơn",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ))),
+                    Expanded(
+                        child: ElevatedButton(
+                            onPressed: () => navigateToCollectInvoicePage() ,
+                            style: TextButton.styleFrom(backgroundColor: Colors.deepPurpleAccent),
+                            child: const Text(
+                              "Thu Tiền",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ))),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => navigateToExpensePage(),
+                        style: TextButton.styleFrom(backgroundColor: Colors.indigo),
+                        child: const Text("Chi Phí",
+                          textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,)),
+                      ),
+                    ),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => navigateToReportPage(),
+                        style: TextButton.styleFrom(backgroundColor: Colors.blueGrey),
+                        child: const Text("Báo Cáo",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+                      ),
+                    ),
+                    ],
+                  ),
+
                   Expanded(
                     child: ListView.builder(
                       itemCount: filteredItems?.length ?? 0,
@@ -196,7 +292,7 @@ class _RoomPageState extends State<RoomPage> {
                 Container(
                   margin: const EdgeInsets.only(
                     bottom: 20,
-                    right: 20,
+                    right: 300,
                   ),
                   child: ElevatedButton(
                     onPressed: () => createNewRoom(),

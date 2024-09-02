@@ -27,6 +27,7 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
         invoices = room!.invoices.toList();
       });
       filteredItems = invoices;
+      filteredItems?.sort((b,a) => a.key!.compareTo(b.key));
     });
   }
 
@@ -42,9 +43,16 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
     setState(() {
       invoices = List<Invoice>.from(room!.invoices);
       filteredItems = List<Invoice>.from(room!.invoices);
+      filteredItems?.sort((b,a) => a.key!.compareTo(b.key));
     });
   }
-
+  navigateToInvoiceCreate(Room? room){
+    Navigator.pushNamed(
+        context,
+        '/invoice-page/create',
+        arguments: room
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,14 +84,45 @@ class _InvoiceManagementState extends State<InvoiceManagement> {
                               removeFuntion: () {
                                 removeInvoice(index);
                               },
+                              isShowMenu: true,
                             ));
                       },
                     ),
                   ),
                 ],
-              ))
+              )),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(
+                    bottom: 20,
+                    right: 300,
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () => navigateToInvoiceCreate(room),
+                    style: ElevatedButton.styleFrom(
+                      alignment: Alignment.bottomLeft,
+                      minimumSize: const Size(60, 60),
+                      elevation: 10,
+                    ),
+                    child: const Text(
+                      '+',
+                      style: TextStyle(
+                        fontSize: 40,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
         ],
+
       ),
+
     );
   }
 }

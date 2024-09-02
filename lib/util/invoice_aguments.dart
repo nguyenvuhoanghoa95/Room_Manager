@@ -1,9 +1,12 @@
 import 'package:room_manager/model/invoice.dart';
 import 'package:room_manager/model/room.dart';
 
-class InvoiceAguments {
+import '../model/house.dart';
+
+class InvoiceArguments {
+  final House house;
   final Room room;
   final Invoice invoice;
 
-  InvoiceAguments(this.room, this.invoice);
+  InvoiceArguments(this.house, this.room, this.invoice);
 }

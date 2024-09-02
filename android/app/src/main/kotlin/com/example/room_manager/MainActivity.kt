@@ -1,4 +1,4 @@
-package com.example.room_manager
+package com.app.room_manager
 
 import io.flutter.embedding.android.FlutterActivity
 

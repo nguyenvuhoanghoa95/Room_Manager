@@ -4,10 +4,11 @@ import 'package:room_manager/model/house.dart';
 import 'package:room_manager/widgets/appbar/home_appbar.dart';
 import 'package:room_manager/widgets/dialog/house_dialog.dart';
 import '../constants/colors.dart';
+import '../constants/const.dart';
 import '../widgets/house/house_item.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const  HomePage({super.key});
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   final _availableRoomsController = TextEditingController();
   final _electricityPriceController = TextEditingController();
   final _waterPriceController = TextEditingController();
+  final _waterByPersonController =  TextEditingController();
 
   List<House>? houses = houseBox.values.toList();
 
@@ -43,27 +45,27 @@ class _HomePageState extends State<HomePage> {
 
   //save
   saveHouse({int? index}) {
-    if (_addressController.text.isNotEmpty &&
-        _nameOwnerController.text.isNotEmpty &&
-        _availableRoomsController.text.isNotEmpty &&
-        _electricityPriceController.text.isNotEmpty &&
-        _waterPriceController.text.isNotEmpty) {
+    if (_addressController.text.isNotEmpty) {
       if (index == null) {
         //Add action
         addHouse();
       } else {
         //Edit action
-        editHouse(houses![index]);
+        editHouse(filteredItems![index]);
       }
     }
     setState(() {
       filteredItems = List<House>.from(houseBox.values);
+      houses = filteredItems;
     });
     cancel();
   }
 
   // Create new home
   createDialog() {
+    _electricityPriceController.text = "3,500";
+    _waterPriceController.text = "100,000";
+    _waterByPersonController.text = "true";
     showDialog(
       context: context,
       builder: (context) {
@@ -73,6 +75,7 @@ class _HomePageState extends State<HomePage> {
           nameOwnerController: _nameOwnerController,
           electricityPriceController: _electricityPriceController,
           waterPriceController: _waterPriceController,
+          waterByPersonController: _waterByPersonController,
           create: () => saveHouse(),
           cancel: () => cancel(),
         );
@@ -83,14 +86,15 @@ class _HomePageState extends State<HomePage> {
   addHouse() {
     var newHouse = House(
         _addressController.text,
-        _nameOwnerController.text,
-        int.parse(_availableRoomsController.text),
-        int.parse(_electricityPriceController.text),
-        int.parse(_waterPriceController.text),
-        true);
+        "",
+        0,
+        int.parse(_electricityPriceController.text.replaceAll(",", "")),
+        int.parse(_waterPriceController.text.replaceAll(",", "")),
+        bool.parse(_waterByPersonController.text),
+        );
 
     houseBox.add(newHouse);
-    //houses![houseBox.length].save();
+   // houses![houseBox.length-1].save();
   }
 
   //Call edit house dialog
@@ -102,9 +106,9 @@ class _HomePageState extends State<HomePage> {
         _addressController.text = house.address;
         _availableRoomsController.text = "${house.availableRooms}";
         _nameOwnerController.text = house.nameOwner;
-        _electricityPriceController.text = "${house.electricityPrice}";
-        _waterPriceController.text = "${house.waterPrice}";
-
+        _electricityPriceController.text = moneyFormat.format(house.electricityPrice);
+        _waterPriceController.text = moneyFormat.format(house.waterPrice);
+        _waterByPersonController.text = house.isWaterPerPerson.toString();
         //Open dialog
         return HouseDialog(
           addressController: _addressController,
@@ -112,6 +116,7 @@ class _HomePageState extends State<HomePage> {
           nameOwnerController: _nameOwnerController,
           electricityPriceController: _electricityPriceController,
           waterPriceController: _waterPriceController,
+          waterByPersonController: _waterByPersonController,
           edit: () => saveHouse(index: index),
           cancel: () => cancel(),
         );
@@ -124,8 +129,9 @@ class _HomePageState extends State<HomePage> {
     editHouse.nameOwner = _nameOwnerController.text;
     editHouse.address = _addressController.text;
     editHouse.availableRooms = int.parse(_availableRoomsController.text);
-    editHouse.electricityPrice = int.parse(_electricityPriceController.text);
-    editHouse.waterPrice = int.parse(_waterPriceController.text);
+    editHouse.electricityPrice = int.parse(_electricityPriceController.text.replaceAll(",", ""));
+    editHouse.waterPrice = int.parse(_waterPriceController.text.replaceAll(",", ""));
+    editHouse.isWaterPerPerson = bool.parse(_waterByPersonController.text);
     return editHouse.save();
   }
 
@@ -198,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   margin: const EdgeInsets.only(
                     bottom: 20,
-                    right: 20,
+                    right: 300,
                   ),
                   child: ElevatedButton(
                     onPressed: () => createDialog(),

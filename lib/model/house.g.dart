@@ -21,15 +21,18 @@ class HouseAdapter extends TypeAdapter<House> {
       fields[1] as String,
       fields[2] as int,
       fields[3] == null ? 3500 : fields[3] as int,
-      fields[4] == null ? 17000 : fields[4] as int,
+      fields[4] == null ? 100000 : fields[4] as int,
       fields[6] as bool?,
-    )..rooms = (fields[5] as HiveList).castHiveList();
+    )
+      ..rooms = (fields[5] as HiveList).castHiveList()
+      ..expenses = (fields[7] as HiveList).castHiveList()
+      ..serviceAmount = fields[8] == null ? 100000 : fields[8] as int;
   }
 
   @override
   void write(BinaryWriter writer, House obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.address)
       ..writeByte(1)
@@ -43,7 +46,11 @@ class HouseAdapter extends TypeAdapter<House> {
       ..writeByte(5)
       ..write(obj.rooms)
       ..writeByte(6)
-      ..write(obj.isWaterPerPerson);
+      ..write(obj.isWaterPerPerson)
+      ..writeByte(7)
+      ..write(obj.expenses)
+      ..writeByte(8)
+      ..write(obj.serviceAmount);
   }
 
   @override
